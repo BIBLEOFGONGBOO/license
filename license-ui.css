@@ -1617,3 +1617,61 @@ html[data-license-explain="off"]
 /* ==========================================================================
    BLOCK 3000 END : LICENSE EXAM TIMER SETTINGS BUTTON
    ========================================================================== */
+
+
+
+
+
+
+/* ==========================================================================
+   BLOCK 3010 START : KAKAO EXTERNAL BROWSER GUIDE
+   ========================================================================== */
+
+.kakao-external-browser-guide {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(15 23 42 / 72%);
+}
+
+.kakao-external-browser-guide[hidden] {
+  display: none;
+}
+
+.kakao-external-browser-card {
+  width: min(100%, 420px);
+  padding: 24px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #172033;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 35%);
+  text-align: center;
+}
+
+.kakao-external-browser-card strong {
+  display: block;
+  font-size: 20px;
+}
+
+.kakao-external-browser-card p {
+  margin: 14px 0 20px;
+  line-height: 1.55;
+}
+
+#kakaoExternalBrowserButton {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 12px;
+  background: #075ea8;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+/* ==========================================================================
+   BLOCK 3010 END : KAKAO EXTERNAL BROWSER GUIDE
+   ========================================================================== */   

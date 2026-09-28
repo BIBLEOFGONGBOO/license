@@ -4975,6 +4975,96 @@ bootCurrentButtonHoverHelp();
 // END: BUTTON HOVER HELP
 // ============================================================================
 
+
+
+
+// ============================================================================
+// 🟦 BLOCK 18000: KAKAO IN-APP EXTERNAL BROWSER CONTROLLER
+// Purpose: KakaoTalk in-app browser only.
+// PC Chrome, normal Android Chrome, and APK are excluded.
+// ============================================================================
+
+function isCurrentKakaoInAppBrowser() {
+  return /kakaotalk/i.test(
+    String(navigator.userAgent || '')
+  );
+}
+
+function getCurrentKakaoExternalTargetUrl() {
+  var targetUrl =
+    new URL(window.location.href);
+
+  targetUrl.searchParams.set(
+    'kakaoExternal',
+    '1'
+  );
+
+  return targetUrl.toString();
+}
+
+function openCurrentKakaoInExternalBrowser() {
+  var targetUrl =
+    getCurrentKakaoExternalTargetUrl();
+
+  window.location.href =
+    'kakaotalk://web/openExternal?url=' +
+    encodeURIComponent(targetUrl);
+}
+
+function bootCurrentKakaoExternalBrowserGuide() {
+  if (!isCurrentKakaoInAppBrowser()) {
+    return;
+  }
+
+  var guide =
+    document.getElementById(
+      'kakaoExternalBrowserGuide'
+    );
+
+  var button =
+    document.getElementById(
+      'kakaoExternalBrowserButton'
+    );
+
+  if (!guide || !button) {
+    return;
+  }
+
+  guide.hidden = false;
+
+  button.onclick = function() {
+    openCurrentKakaoInExternalBrowser();
+  };
+
+  var attemptedKey =
+    'gongbooKakaoExternalAttempted';
+
+  try {
+    if (sessionStorage.getItem(attemptedKey)) {
+      return;
+    }
+
+    sessionStorage.setItem(
+      attemptedKey,
+      '1'
+    );
+
+    window.setTimeout(function() {
+      openCurrentKakaoInExternalBrowser();
+    }, 200);
+
+  } catch (error) {
+    // 자동 이동이 막혀도 사용자가 버튼을 눌러 시도할 수 있다.
+  }
+}
+
+bootCurrentKakaoExternalBrowserGuide();
+
+
+
+
+
+
 // ============================================================================
 // PART 2 : LICENSE APPLICATION MODULE
 // Source: verified license-main-backup.js.
@@ -6039,275 +6129,277 @@ async function fetchLicenseQuestions(
 // PART 3 : LICENSE LESSON EXECUTION
 // Scope: question rendering, Learn / Play flow, answer processing, results,
 //        and License runtime bootstrap.
-// ============================================================================
-     BLOCK 31000 START : LICENSE QUESTION LANGUAGE SELECTION
-     ======================================================================== */
+/* ============================================================================
+   BLOCK 31000 START : LICENSE QUESTION LANGUAGE SELECTION
+   ============================================================================ */
 
-  function renderLicenseQuestion() {
-    const question = licenseQuestions[
-      licenseQuestionIndex
-    ];
+function renderLicenseQuestion() {
+  const question = licenseQuestions[
+    licenseQuestionIndex
+  ];
 
-    const progressText = document.getElementById(
-      'licenseProgressText'
+  const progressText = document.getElementById(
+    'licenseProgressText'
+  );
+
+  const questionNumber = document.getElementById(
+    'licenseQuestionNumber'
+  );
+
+  const prompt = document.getElementById(
+    'licenseQuestionPrompt'
+  );
+
+  const choices = document.getElementById(
+    'licenseQuestionChoices'
+  );
+
+  const feedback = document.getElementById(
+    'licenseQuestionFeedback'
+  );
+
+  if (
+    !question ||
+    !progressText ||
+    !questionNumber ||
+    !prompt ||
+    !choices ||
+    !feedback
+  ) {
+    return;
+  }
+
+  function normalizeLanguage(value) {
+    const code = String(value || '')
+      .trim()
+      .toUpperCase();
+
+    if (code === 'ENG') {
+      return 'EN';
+    }
+
+    if (code === 'KOR') {
+      return 'KO';
+    }
+
+    return code;
+  }
+
+  const primaryLanguage = normalizeLanguage(
+    document.getElementById(
+      'primaryLanguageSelect'
+    )?.value || 'EN'
+  );
+
+  const secondaryLanguage = normalizeLanguage(
+    document.getElementById(
+      'secondaryLanguageSelect'
+    )?.value || 'NONE'
+  );
+
+  const languageCodes = [
+    primaryLanguage,
+    secondaryLanguage
+  ].filter(function (code, index, values) {
+    return (
+      (code === 'EN' || code === 'KO') &&
+      values.indexOf(code) === index
     );
+  });
 
-    const questionNumber = document.getElementById(
-      'licenseQuestionNumber'
-    );
+  if (!languageCodes.length) {
+    languageCodes.push('EN');
+  }
 
-    const prompt = document.getElementById(
-      'licenseQuestionPrompt'
-    );
+  window.CONVERSATION_V2_ROW = {
+    LNG: languageCodes[0]
+  };
 
-    const choices = document.getElementById(
-      'licenseQuestionChoices'
-    );
+  window.CONVERSATION_V2_SECONDARY_ROW = {
+    LNG: languageCodes[1] || languageCodes[0]
+  };
 
-    const feedback = document.getElementById(
-      'licenseQuestionFeedback'
-    );
+  function getText(language, field) {
+    const translation = language === 'KO'
+      ? question.korean
+      : question.english;
 
-    if (
-      !question ||
-      !progressText ||
-      !questionNumber ||
-      !prompt ||
-      !choices ||
-      !feedback
-    ) {
+    return translation[field] || '';
+  }
+
+  function appendSpeechText(
+    container,
+    tagName,
+    language,
+    text,
+    position,
+    className
+  ) {
+    if (!text) {
       return;
     }
 
-    function normalizeLanguage(value) {
-      const code = String(value || '')
-        .trim()
-        .toUpperCase();
+    const element = document.createElement(tagName);
 
-      if (code === 'ENG') {
-        return 'EN';
-      }
+    element.className =
+      className +
+      ' ' +
+      (language === 'KO'
+        ? 'language-line-ko'
+        : 'language-line-en') +
+      ' ' +
+      (position === 0
+        ? 'conversation-turn-text'
+        : 'conversation-secondary-text');
 
-      if (code === 'KOR') {
-        return 'KO';
-      }
+    element.textContent = text;
 
-      return code;
-    }
+    container.appendChild(element);
+  }
 
-    const primaryLanguage = normalizeLanguage(
-      document.getElementById(
-        'primaryLanguageSelect'
-      )?.value || 'EN'
-    );
+  const currentAnswer = licenseAnswers[
+    licenseQuestionIndex
+  ];
 
-    const secondaryLanguage = normalizeLanguage(
-      document.getElementById(
-        'secondaryLanguageSelect'
-      )?.value || 'NONE'
-    );
+  const correctAnswer = Number(question.answer);
 
-    const languageCodes = [
-      primaryLanguage,
-      secondaryLanguage
-    ].filter(function (code, index, values) {
-      return (
-        (code === 'EN' || code === 'KO') &&
-        values.indexOf(code) === index
-      );
-    });
+  const totalQuestionCount = Number(
+    licenseCurrentCourse.totalQuestionCount ||
+    licenseQuestions.length
+  );
 
-    if (!languageCodes.length) {
-      languageCodes.push('EN');
-    }
+  progressText.textContent = '';
 
-    window.CONVERSATION_V2_ROW = {
-      LNG: languageCodes[0]
-    };
+  questionNumber.textContent =
+    'Question ' +
+    String(licenseQuestionIndex + 1) +
+    ' / ' +
+    String(totalQuestionCount);
 
-    window.CONVERSATION_V2_SECONDARY_ROW = {
-      LNG: languageCodes[1] || languageCodes[0]
-    };
+  prompt.innerHTML = '';
+  choices.innerHTML = '';
+  feedback.innerHTML = '';
 
-    function getText(language, field) {
-      const translation = language === 'KO'
-        ? question.korean
-        : question.english;
+  const questionCard = document.createElement('article');
 
-      return translation[field] || '';
-    }
+  questionCard.className =
+    'license-prompt-card conversation-turn-card';
 
-    function appendSpeechText(
-      container,
-      tagName,
+  questionCard.dataset.turn = '1';
+
+  languageCodes.forEach(function (language, position) {
+    appendSpeechText(
+      questionCard,
+      'p',
       language,
-      text,
+      getText(language, 'question_text'),
       position,
-      className
-    ) {
-      if (!text) {
-        return;
-      }
+      'license-question-line'
+    );
+  });
 
-      const element = document.createElement(tagName);
+  prompt.appendChild(questionCard);
 
-      element.className =
-        className +
-        ' ' +
-        (language === 'KO'
-          ? 'language-line-ko'
-          : 'language-line-en') +
-        ' ' +
-        (position === 0
-          ? 'conversation-turn-text'
-          : 'conversation-secondary-text');
+  [1, 2, 3, 4].forEach(function (number) {
+    const choice = document.createElement('button');
 
-      element.textContent = text;
+    const letter = document.createElement('span');
 
-      container.appendChild(element);
-    }
+    const content = document.createElement('span');
 
-    const currentAnswer = licenseAnswers[
-      licenseQuestionIndex
-    ];
+    const selected = currentAnswer === number;
 
-    const correctAnswer = Number(question.answer);
+    const correct = number === correctAnswer;
 
-    const totalQuestionCount = Number(
-      licenseCurrentCourse.totalQuestionCount ||
-      licenseQuestions.length
+    choice.type = 'button';
+
+    choice.className =
+      'choice license-choice conversation-turn-card';
+
+    choice.dataset.turn = String(number + 1);
+
+    choice.dataset.licenseAnswer = String(number);
+
+    letter.className = 'choice-letter license-choice-letter';
+
+    letter.textContent = String.fromCharCode(
+      64 + number
     );
 
-    progressText.textContent = '';
-
-    questionNumber.textContent =
-      'Question ' +
-      String(licenseQuestionIndex + 1) +
-      ' / ' +
-      String(totalQuestionCount);
-
-    prompt.innerHTML = '';
-    choices.innerHTML = '';
-    feedback.innerHTML = '';
-
-    const questionCard = document.createElement('article');
-
-    questionCard.className =
-      'license-prompt-card conversation-turn-card';
-
-    questionCard.dataset.turn = '1';
+    content.className =
+      'choice-language-content license-choice-content';
 
     languageCodes.forEach(function (language, position) {
       appendSpeechText(
-        questionCard,
-        'p',
+        content,
+        'span',
         language,
-        getText(language, 'question_text'),
+        getText(language, 'option_' + number),
         position,
-        'license-question-line'
+        'license-choice-' +
+          (language === 'KO' ? 'korean' : 'english')
       );
     });
 
-    prompt.appendChild(questionCard);
+    choice.appendChild(letter);
+    choice.appendChild(content);
 
-    [1, 2, 3, 4].forEach(function (number) {
-      const choice = document.createElement('button');
+    if (licenseMode === 'learn' && correct) {
+      choice.classList.add('correct', 'disabled');
+      choice.disabled = true;
+    }
 
-      const letter = document.createElement('span');
+    if (licenseMode === 'study' && currentAnswer !== null) {
+      if (correct) {
+        choice.classList.add('correct');
+      }
 
-      const content = document.createElement('span');
-
-      const selected = currentAnswer === number;
-
-      const correct = number === correctAnswer;
-
-      choice.type = 'button';
-
-      choice.className =
-        'choice license-choice conversation-turn-card';
-
-      choice.dataset.turn = String(number + 1);
-
-      choice.dataset.licenseAnswer = String(number);
-
-      letter.className = 'choice-letter license-choice-letter';
-
-      letter.textContent = String.fromCharCode(
-        64 + number
-      );
-
-      content.className =
-        'choice-language-content license-choice-content';
-
-      languageCodes.forEach(function (language, position) {
-        appendSpeechText(
-          content,
-          'span',
-          language,
-          getText(language, 'option_' + number),
-          position,
-          'license-choice-' +
-            (language === 'KO' ? 'korean' : 'english')
+      if (selected) {
+        choice.classList.add(
+          'selected',
+          correct ? 'correct' : 'incorrect'
         );
-      });
-
-      choice.appendChild(letter);
-      choice.appendChild(content);
-
-      if (licenseMode === 'learn' && correct) {
-        choice.classList.add('correct', 'disabled');
-        choice.disabled = true;
       }
-
-      if (licenseMode === 'study' && currentAnswer !== null) {
-        if (correct) {
-          choice.classList.add('correct');
-        }
-
-        if (selected) {
-          choice.classList.add(
-            'selected',
-            correct ? 'correct' : 'incorrect'
-          );
-        }
-      }
-
-      if (licenseMode === 'exam' && selected) {
-        choice.classList.add('selected');
-      }
-
-      choice.onclick = function () {
-        selectLicenseAnswer(number);
-      };
-
-      choices.appendChild(choice);
-    });
-
-    if (licenseMode === 'learn') {
-      renderLicenseExplanation(
-        feedback,
-        true,
-        question
-      );
     }
 
-    if (
-      licenseMode === 'study' &&
-      currentAnswer !== null
-    ) {
-      renderLicenseExplanation(
-        feedback,
-        currentAnswer === correctAnswer,
-        question
-      );
+    if (licenseMode === 'exam' && selected) {
+      choice.classList.add('selected');
     }
+
+    choice.onclick = function () {
+      selectLicenseAnswer(number);
+    };
+
+    choices.appendChild(choice);
+  });
+
+  if (
+    licenseMode === 'learn' &&
+    licenseExplainVisible
+  ) {
+    renderLicenseExplanation(
+      feedback,
+      true,
+      question
+    );
   }
 
-  /* ========================================================================
-     BLOCK 31000 END : LICENSE QUESTION LANGUAGE SELECTION
-     ======================================================================== */
+  if (
+    licenseMode === 'study' &&
+    currentAnswer !== null &&
+    licenseExplainVisible
+  ) {
+    renderLicenseExplanation(
+      feedback,
+      currentAnswer === correctAnswer,
+      question
+    );
+  }
+}
 
-
+/* ============================================================================
+   BLOCK 31000 END : LICENSE QUESTION LANGUAGE SELECTION
+   ============================================================================ */
 
 
   /* ========================================================================
