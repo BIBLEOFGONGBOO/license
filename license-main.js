@@ -1856,9 +1856,11 @@ function prepareCurrentTtsWordHighlight(
     return;
   }
 
-  var text =
+   var text =
     card.querySelector(
-      '.conversation-turn-text'
+      item.kind === 'secondary'
+        ? '.conversation-secondary-text'
+        : '.conversation-turn-text'
     );
 
   if (!text) {
