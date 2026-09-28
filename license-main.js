@@ -1930,10 +1930,13 @@ function prepareCurrentTtsWordHighlight(
   var speechText =
     String(item.speechText || '');
 
+   displayText = displayText.trim();
+
+  speechText = speechText.trim();
+
   if (
     !displayText ||
-    !speechText ||
-    displayText !== speechText
+    !speechText
   ) {
     return;
   }
