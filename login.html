@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <!-- ===================================================================
+         BLOCK 1000 : DOCUMENT META AND CONFIGURATION
+         =================================================================== -->
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>GongBoo.org - Login</title>
+
+
+
+
+
+    <!-- ===================================================================
+         BLOCK 1500 : LOGIN PAGE STYLES
+         =================================================================== -->
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #f7fafc;
+            color: #2d3748;
+            font-family:
+                Arial,
+                "Noto Sans KR",
+                "Apple SD Gothic Neo",
+                "Malgun Gothic",
+                sans-serif;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 32px 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        }
+
+        .login-title {
+            margin-bottom: 4px;
+            color: #2d3748;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-align: center;
+        }
+
+        .login-subtitle {
+            margin-bottom: 28px;
+            color: #718096;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 24px;
+            padding: 4px;
+            border-radius: 10px;
+            background: #f7fafc;
+        }
+
+        .login-tab-button {
+            flex: 1;
+            min-height: 42px;
+            border: 0;
+            border-radius: 8px;
+            background: transparent;
+            color: #718096;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .login-tab-button.active {
+            background: #f5a623;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(245, 166, 35, 0.25);
+        }
+
+        .login-tab-button:hover:not(.active) {
+            background: #edf2f7;
+        }
+
+        .login-form-hidden {
+            display: none;
+        }
+
+        .login-field {
+            margin-bottom: 16px;
+        }
+
+        .login-field label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4a5568;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .login-field input {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+            color: #2d3748;
+            font-size: 15px;
+        }
+
+        .login-field input:focus {
+            outline: none;
+            border-color: #f5a623;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.12);
+        }
+
+        .password-field {
+            position: relative;
+        }
+
+        .password-field input {
+            padding-right: 48px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 14px;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            color: #718096;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .login-submit-button {
+            width: 100%;
+            min-height: 52px;
+            margin-top: 4px;
+            border: 0;
+            border-radius: 8px;
+            background: #f5a623;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 2px 8px rgba(245, 166, 35, 0.3);
+        }
+
+        .login-submit-button:hover {
+            background: #e0951f;
+        }
+
+        .login-result {
+            min-height: 48px;
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+            color: #2d3748;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .login-result.success {
+            border-color: #48bb78;
+            background: #f0fff4;
+            color: #276749;
+        }
+
+        .login-result.error {
+            border-color: #fc8181;
+            background: #fff5f5;
+            color: #c53030;
+        }
+
+        @media (max-width: 480px) {
+
+            body {
+                padding: 14px;
+            }
+
+            .login-container {
+                padding: 24px 18px;
+            }
+
+            .login-title {
+                font-size: 24px;
+            }
+
+            .login-tab-button {
+                font-size: 12px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+
+
+
+<body>
+
+    <!-- ===================================================================
+         BLOCK 2000 : LOGIN PAGE CONTAINER
+         =================================================================== -->
+
+    <main class="login-container">
+
+        <h1 class="login-title">
+            GongBoo.org
+        </h1>
+
+        <p class="login-subtitle">
+            Member Service
+        </p>
+
+
+
+
+
+        <!-- ===============================================================
+             BLOCK 2500 : LOGIN / SIGN UP / PASSWORD TABS
+             =============================================================== -->
+
+        <div class="login-tabs">
+
+            <button
+                class="login-tab-button active"
+                type="button"
+                data-login-tab="loginTab"
+            >
+                Login
+            </button>
+
+            <button
+                class="login-tab-button"
+                type="button"
+                data-login-tab="signupTab"
+            >
+                Sign Up
+            </button>
+
+            <button
+                class="login-tab-button"
+                type="button"
+                data-login-tab="changeTab"
+            >
+                Password
+            </button>
+
+        </div>
+
+
+
+
+
+        <!-- ===============================================================
+             BLOCK 3000 : LOGIN FORM
+             =============================================================== -->
+
+        <form id="loginTab">
+
+            <div class="login-field">
+
+                <label for="loginEmail">
+                    E-mail
+                </label>
+
+                <input
+                    id="loginEmail"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="example@email.com"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="loginPassword">
+                    Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="loginPassword"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="Enter your password"
+                    >
+
+                    <button
+                        id="toggleLoginPassword"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                id="loginSubmitButton"
+                class="login-submit-button"
+                type="submit"
+            >
+                Login
+            </button>
+
+            <div
+                id="loginResult"
+                class="login-result"
+            ></div>
+
+        </form>
+
+
+
+
+
+        <!-- ===============================================================
+             BLOCK 3500 : SIGN UP FORM
+             =============================================================== -->
+
+        <section
+            id="signupTab"
+            class="login-form-hidden"
+        >
+
+            <div class="login-field">
+
+                <label for="signupEmail">
+                    E-mail
+                </label>
+
+                <input
+                    id="signupEmail"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="example@email.com"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="signupName">
+                    Full Name
+                </label>
+
+                <input
+                    id="signupName"
+                    type="text"
+                    autocomplete="name"
+                    placeholder="Your full name"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="signupPhone">
+                    Phone Number
+                </label>
+
+                <input
+                    id="signupPhone"
+                    type="tel"
+                    autocomplete="tel"
+                    placeholder="01012345678"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="signupPassword">
+                    Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="signupPassword"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="At least 6 characters"
+                    >
+
+                    <button
+                        id="toggleSignupPassword"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="signupPasswordConfirm">
+                    Confirm Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="signupPasswordConfirm"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="Confirm password"
+                    >
+
+                    <button
+                        id="toggleSignupPasswordConfirm"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                id="signupSubmitButton"
+                class="login-submit-button"
+                type="button"
+            >
+                Sign Up
+            </button>
+
+            <div
+                id="signupResult"
+                class="login-result"
+            ></div>
+
+        </section>
+
+
+
+
+
+        <!-- ===============================================================
+             BLOCK 4000 : CHANGE PASSWORD FORM
+             =============================================================== -->
+
+        <section
+            id="changeTab"
+            class="login-form-hidden"
+        >
+
+            <div class="login-field">
+
+                <label for="changeEmail">
+                    E-mail
+                </label>
+
+                <input
+                    id="changeEmail"
+                    type="email"
+                    autocomplete="email"
+                    placeholder="example@email.com"
+                >
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="changeOldPassword">
+                    Current Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="changeOldPassword"
+                        type="password"
+                        autocomplete="current-password"
+                        placeholder="Current password"
+                    >
+
+                    <button
+                        id="toggleChangeOldPassword"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="changeNewPassword">
+                    New Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="changeNewPassword"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="4 characters"
+                    >
+
+                    <button
+                        id="toggleChangeNewPassword"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div class="login-field">
+
+                <label for="changeNewPasswordConfirm">
+                    Confirm New Password
+                </label>
+
+                <div class="password-field">
+
+                    <input
+                        id="changeNewPasswordConfirm"
+                        type="password"
+                        autocomplete="new-password"
+                        placeholder="Confirm new password"
+                    >
+
+                    <button
+                        id="toggleChangeNewPasswordConfirm"
+                        class="password-toggle"
+                        type="button"
+                        aria-label="Show password"
+                    >
+                        👁️
+                    </button>
+
+                </div>
+
+            </div>
+
+            <button
+                id="changePasswordSubmitButton"
+                class="login-submit-button"
+                type="button"
+            >
+                Change Password
+            </button>
+
+            <div
+                id="changePasswordResult"
+                class="login-result"
+            ></div>
+
+        </section>
+
+    </main>
+
+
+
+
+
+    <!-- ===================================================================
+         BLOCK 9000 : CURRENT LICENSE SUPABASE AUTHENTICATION
+         =================================================================== -->
+
+    <script src="config.js"></script>
+
+    <script>
+
+        'use strict';
+
+        const LICENSE_AUTH_CONFIG = window.LICENSE_CONFIG;
+
+        function showResult(elementId, message, isSuccess) {
+            const element = document.getElementById(elementId);
+
+            element.textContent = message;
+            element.className =
+                'login-result' + (isSuccess ? ' success' : ' error');
+        }
+
+        function getAuthErrorMessage(value) {
+            return (
+                value?.message ||
+                value?.msg ||
+                value?.error_description ||
+                value?.error ||
+                'Authentication failed.'
+            );
+        }
+
+        async function licenseAuthRequest(path, options) {
+            const response = await fetch(
+                LICENSE_AUTH_CONFIG.url + path,
+                {
+                    ...options,
+                    headers: {
+                        apikey: LICENSE_AUTH_CONFIG.publishableKey,
+                        'Content-Type': 'application/json',
+                        ...(options?.headers || {})
+                    }
+                }
+            );
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(getAuthErrorMessage(data));
+            }
+
+            return data;
+        }
+
+        function saveLicenseSession(session) {
+            localStorage.setItem(
+                LICENSE_AUTH_CONFIG.authStorageKey,
+                JSON.stringify(session)
+            );
+        }
+
+        function showLoginTab(tabId) {
+            document
+                .querySelectorAll('.login-tab-button')
+                .forEach(button => {
+                    button.classList.toggle(
+                        'active',
+                        button.dataset.loginTab === tabId
+                    );
+                });
+
+            ['loginTab', 'signupTab', 'changeTab'].forEach(id => {
+                document
+                    .getElementById(id)
+                    .classList.toggle(
+                        'login-form-hidden',
+                        id !== tabId
+                    );
+            });
+        }
+
+        function installPasswordToggle(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+
+            button.addEventListener('click', () => {
+                const isHidden = input.type === 'password';
+
+                input.type = isHidden ? 'text' : 'password';
+                button.textContent = isHidden ? '🙈' : '👁️';
+            });
+        }
+
+        document
+            .querySelectorAll('.login-tab-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    showLoginTab(button.dataset.loginTab);
+                });
+            });
+
+        document
+            .getElementById('loginTab')
+            .addEventListener('submit', async event => {
+                event.preventDefault();
+
+                const email = document
+                    .getElementById('loginEmail')
+                    .value
+                    .trim();
+
+                const password = document
+                    .getElementById('loginPassword')
+                    .value;
+
+                if (!email || !password) {
+                    showResult(
+                        'loginResult',
+                        'Please enter both e-mail and password.',
+                        false
+                    );
+
+                    return;
+                }
+
+                showResult(
+                    'loginResult',
+                    'Logging in...',
+                    false
+                );
+
+                try {
+                    const session = await licenseAuthRequest(
+                        '/auth/v1/token?grant_type=password',
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                email,
+                                password
+                            })
+                        }
+                    );
+
+                    saveLicenseSession(session);
+
+                    window.location.href = 'license-index.html';
+                } catch (error) {
+                    showResult(
+                        'loginResult',
+                        getAuthErrorMessage(error),
+                        false
+                    );
+                }
+            });
+
+        document
+            .getElementById('signupSubmitButton')
+            .addEventListener('click', async () => {
+                const email = document
+                    .getElementById('signupEmail')
+                    .value
+                    .trim();
+
+                const name = document
+                    .getElementById('signupName')
+                    .value
+                    .trim();
+
+                const phone = document
+                    .getElementById('signupPhone')
+                    .value
+                    .trim();
+
+                const password = document
+                    .getElementById('signupPassword')
+                    .value;
+
+                const confirm = document
+                    .getElementById('signupPasswordConfirm')
+                    .value;
+
+                if (!email || !name || !phone || !password || !confirm) {
+                    showResult(
+                        'signupResult',
+                        'Please fill in all fields.',
+                        false
+                    );
+
+                    return;
+                }
+
+                if (password !== confirm) {
+                    showResult(
+                        'signupResult',
+                        'Passwords do not match.',
+                        false
+                    );
+
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showResult(
+                        'signupResult',
+                        'Password must be at least 6 characters.',
+                        false
+                    );
+
+                    return;
+                }
+
+                showResult(
+                    'signupResult',
+                    'Creating account...',
+                    false
+                );
+
+                try {
+                    const result = await licenseAuthRequest(
+                        '/auth/v1/signup',
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                email,
+                                password,
+                                data: {
+                                    name,
+                                    phone
+                                }
+                            })
+                        }
+                    );
+
+                    if (result.access_token) {
+                        saveLicenseSession(result);
+
+                        window.location.href = 'license-index.html';
+
+                        return;
+                    }
+
+                    document.getElementById('loginEmail').value = email;
+
+                    showResult(
+                        'loginResult',
+                        'Registration completed. Check your e-mail, then log in.',
+                        true
+                    );
+
+                    showLoginTab('loginTab');
+                } catch (error) {
+                    showResult(
+                        'signupResult',
+                        getAuthErrorMessage(error),
+                        false
+                    );
+                }
+            });
+
+        document
+            .getElementById('changePasswordSubmitButton')
+            .addEventListener('click', async () => {
+                const email = document
+                    .getElementById('changeEmail')
+                    .value
+                    .trim();
+
+                const oldPassword = document
+                    .getElementById('changeOldPassword')
+                    .value;
+
+                const newPassword = document
+                    .getElementById('changeNewPassword')
+                    .value;
+
+                const confirm = document
+                    .getElementById('changeNewPasswordConfirm')
+                    .value;
+
+                if (!email || !oldPassword || !newPassword || !confirm) {
+                    showResult(
+                        'changePasswordResult',
+                        'Please fill in all fields.',
+                        false
+                    );
+
+                    return;
+                }
+
+                if (newPassword !== confirm) {
+                    showResult(
+                        'changePasswordResult',
+                        'New passwords do not match.',
+                        false
+                    );
+
+                    return;
+                }
+
+                if (newPassword.length < 6) {
+                    showResult(
+                        'changePasswordResult',
+                        'Password must be at least 6 characters.',
+                        false
+                    );
+
+                    return;
+                }
+
+                showResult(
+                    'changePasswordResult',
+                    'Changing password...',
+                    false
+                );
+
+                try {
+                    const session = await licenseAuthRequest(
+                        '/auth/v1/token?grant_type=password',
+                        {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                email,
+                                password: oldPassword
+                            })
+                        }
+                    );
+
+                    await licenseAuthRequest('/auth/v1/user', {
+                        method: 'PUT',
+                        headers: {
+                            Authorization:
+                                'Bearer ' + session.access_token
+                        },
+                        body: JSON.stringify({
+                            password: newPassword
+                        })
+                    });
+
+                    saveLicenseSession(session);
+
+                    showResult(
+                        'changePasswordResult',
+                        'Password changed.',
+                        true
+                    );
+                } catch (error) {
+                    showResult(
+                        'changePasswordResult',
+                        getAuthErrorMessage(error),
+                        false
+                    );
+                }
+            });
+
+        installPasswordToggle(
+            'loginPassword',
+            'toggleLoginPassword'
+        );
+
+        installPasswordToggle(
+            'signupPassword',
+            'toggleSignupPassword'
+        );
+
+        installPasswordToggle(
+            'signupPasswordConfirm',
+            'toggleSignupPasswordConfirm'
+        );
+
+        installPasswordToggle(
+            'changeOldPassword',
+            'toggleChangeOldPassword'
+        );
+
+        installPasswordToggle(
+            'changeNewPassword',
+            'toggleChangeNewPassword'
+        );
+
+        installPasswordToggle(
+            'changeNewPasswordConfirm',
+            'toggleChangeNewPasswordConfirm'
+        );
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,1619 @@
+/* ==========================================================================
+   🟥 BLOCK 2000: MOBILE CONVERSATION STYLE
+   ========================================================================== */
+
+/* ==========================================================================
+   🟩 BLOCK 2100: FOUNDATION
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2110: GLOBAL MOBILE RESET
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f5f7fb;
+  color: #172033;
+  font-family:
+    Arial,
+    sans-serif;
+}
+
+
+/* ==========================================================================
+   🟩 BLOCK 2200: APPLICATION SHELL
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2210: CONVERSATION APP FRAME
+   ========================================================================== */
+
+.conversation-app {
+  width: min(100%, 720px);
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+
+/* ==========================================================================
+   🟦 BLOCK 2222: TOP SYSTEM, PLAY, STOP, LOGIN, AND SETTINGS BUTTONS
+   ========================================================================== */
+
+.conversation-header {
+  display: grid;
+  grid-template-columns:
+    42px
+    minmax(0, 1fr)
+    62px
+    42px
+    42px;
+  gap: 7px;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 0 10px;
+}
+
+.conversation-header button,
+.conversation-header #licenseLoginButton {
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.conversation-header button {
+  cursor: pointer;
+}
+
+.conversation-header #licenseLoginButton {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: #075ea8;
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 1;
+  text-decoration: none;
+}
+
+.conversation-header #licenseLoginButton:active {
+  border-color: #075ea8;
+  background: #eaf5ff;
+}
+
+.conversation-system-split {
+  position: relative;
+  min-width: 0;
+}
+
+.conversation-system-split #systemMenuButton {
+  padding: 0;
+  font-size: 21px;
+  line-height: 1;
+}
+
+.conversation-play-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  min-width: 0;
+}
+
+.conversation-play-split #playButton {
+  min-width: 0;
+  border-radius: 10px 0 0 10px;
+}
+
+.conversation-play-split #playMenuButton {
+  min-width: 0;
+  margin-left: -1px;
+  padding: 0;
+  border-radius: 0 10px 10px 0;
+  font-size: 16px;
+}
+
+.conversation-header #stopButton {
+  border-color: #efb7b7;
+  background: #fff7f7;
+  color: #b42318;
+}
+
+.conversation-header #stopButton:active {
+  background: #fee2e2;
+}
+
+.conversation-header #settingsButton {
+  padding: 0;
+  font-size: 20px;
+}
+
+.conversation-header button[aria-expanded="true"] {
+  position: relative;
+  z-index: 1;
+  border-color: #075ea8;
+  background: #eaf5ff;
+  color: #075ea8;
+}
+
+
+/* ==========================================================================
+   🟦 BLOCK 2223: SYSTEM MENU FIXED INDEX
+   Purpose: Keep header controls fixed and show the system menu full width.
+   ========================================================================== */
+
+#systemMenuPanel {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  z-index: 60;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+
+  width: min(
+    calc(100vw - 24px),
+    696px
+  );
+
+  max-height: calc(100dvh - 96px);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 0;
+  background: #ffffff;
+
+  transform: translateX(-50%);
+
+  box-shadow:
+    0 10px 24px
+    rgb(23 32 51 / 18%);
+}
+
+#systemMenuPanel button {
+  min-height: 0;
+  padding: 9px 10px;
+  border: 0;
+  border-bottom: 1px solid #dbe3ee;
+  border-radius: 0;
+  background: transparent;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-align: left;
+}
+
+#systemMenuPanel button:last-child {
+  border-bottom: 0;
+}
+
+#systemMenuPanel button:first-child {
+  background: #eaf5ff;
+  color: #075ea8;
+  font-weight: 900;
+}
+
+/* ==========================================================================
+   END: SYSTEM MENU FIXED INDEX
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   END: TOP SYSTEM, PLAY, STOP, AND SETTINGS BUTTONS
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2224: DROPDOWN AND PLAY MENUS
+   ========================================================================== */
+
+.conversation-menu {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.conversation-menu[hidden],
+.play-more-panel[hidden] {
+  display: none !important;
+}
+
+.conversation-menu button,
+.play-more-panel button {
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.conversation-menu button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.conversation-system-split {
+  position: relative;
+}
+
+#playMenuPanel {
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+}
+
+#playMenuPanel .play-mode-toggle,
+#playMenuPanel .practice-start-stop-toggle,
+#playMenuPanel .play-practice-toggle,
+#playMenuPanel .continue-next-split {
+  min-height: 36px;
+}
+
+#playMenuPanel .play-mode-toggle,
+#playMenuPanel .practice-start-stop-toggle,
+#playMenuPanel .play-practice-toggle {
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.continue-next-split {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr)
+    34px;
+  gap: 0;
+}
+
+#playMenuPanel .continue-next-toggle,
+#playMenuPanel .continue-next-menu-button {
+  min-height: 36px;
+  line-height: 1;
+}
+
+#playMenuPanel .continue-next-toggle {
+  border-radius: 8px 0 0 8px;
+  border-right: 0;
+  white-space: nowrap;
+}
+
+#playMenuPanel .continue-next-menu-button {
+  padding: 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 16px;
+}
+
+.play-more-panel {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 7px;
+  padding-top: 3px;
+}
+
+/* ==========================================================================
+   END: DROPDOWN AND PLAY MENUS
+   ========================================================================== */
+
+
+
+  /* ==========================================================================
+   🟦 BLOCK 2225: FIXED DROPDOWN LAYERS
+   Purpose: Keep menus fixed and prevent them from covering lesson content.
+   ========================================================================== */
+
+.conversation-app {
+  position: relative;
+}
+
+#playMenuPanel,
+#settingsPanel {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  z-index: 60;
+
+  width: min(
+    calc(100vw - 24px),
+    696px
+  );
+
+  max-height: calc(100dvh - 96px);
+  margin: 0;
+  overflow-y: auto;
+
+  transform: translateX(-50%);
+
+  box-shadow:
+    0 10px 24px
+    rgb(23 32 51 / 18%);
+}
+
+#playMenuPanel {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 8px;
+}
+
+#settingsPanel {
+  padding: 10px;
+}
+
+.conversation-app:has(
+  #playMenuPanel:not([hidden])
+) #conversationLesson {
+  padding-top: 98px;
+}
+
+.conversation-app:has(
+  #settingsPanel:not([hidden])
+) #conversationLesson {
+  padding-top: 278px;
+}
+
+#playMenuPanel[hidden],
+#settingsPanel[hidden] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   END: FIXED DROPDOWN LAYERS
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2226: SETTINGS, STATUS, AND BOTTOM NAVIGATION
+   ========================================================================== */
+
+#settingsPanel {
+  grid-template-columns: 1fr;
+  gap: 7px;
+}
+
+.conversation-settings-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 7px;
+}
+
+.conversation-settings-actions button {
+  min-height: 40px;
+}
+
+.conversation-setting-row {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.conversation-setting-row select {
+  grid-column: 2 / -1;
+}
+
+.conversation-setting-row input {
+  width: 100%;
+  min-height: 34px;
+  padding: 5px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.conversation-setting-row input[type="range"] {
+  min-height: auto;
+  padding: 0;
+}
+
+.conversation-setting-row output {
+  min-width: 40px;
+  color: #172033;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.conversation-speed-loop-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 8px;
+}
+
+.conversation-speed-loop-row .conversation-setting-row {
+  grid-template-columns: 58px minmax(0, 1fr);
+  min-width: 0;
+}
+
+#playLoopToggle {
+  min-height: 34px;
+  padding: 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#playLoopToggle[aria-pressed="true"] {
+  border-color: #075ea8;
+  background: #eaf5ff;
+  color: #075ea8;
+}
+
+.conversation-language-row {
+  display: grid;
+  grid-template-columns:
+    42px
+    minmax(0, 1fr)
+    minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.conversation-language-label {
+  font-size: 13px;
+}
+
+.conversation-language-choice {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+}
+
+.conversation-language-choice span {
+  color: #64748b;
+  font-size: 10px;
+  text-align: center;
+}
+
+.conversation-language-choice select {
+  width: 100%;
+  min-width: 0;
+  min-height: 32px;
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #ffffff;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.conversation-status {
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.conversation-bottom-navigation {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.conversation-bottom-navigation button {
+  min-height: 44px;
+  border: 1px solid #075ea8;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #075ea8;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.conversation-bottom-navigation button:last-child {
+  background: #075ea8;
+  color: #ffffff;
+}
+
+.conversation-footer {
+  padding: 12px 0 4px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-align: center;
+}
+
+/* ==========================================================================
+   END: SETTINGS, STATUS, AND BOTTOM NAVIGATION
+   ========================================================================== */
+
+
+/* ==========================================================================
+   🟦 BLOCK 2227: PHONE SAFE TOP AND COMPACT TEXT
+   ========================================================================== */
+
+.conversation-app {
+  padding: 28px 12px 12px;
+}
+
+.conversation-header button {
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+#playMenuPanel {
+  top: 80px;
+}
+
+.conversation-turn-speaker,
+.conversation-secondary-speaker {
+  font-size: 14px;
+}
+
+.conversation-turn-text,
+.conversation-secondary-text {
+  font-size: 14px;
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+
+/* ==========================================================================
+   END: PHONE SAFE TOP AND COMPACT TEXT
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2228: STICKY TOP CONTROLS
+   Purpose: Keep the top controls available while lesson rows scroll.
+   ========================================================================== */
+
+.conversation-app {
+  padding: 0 12px 12px;
+}
+
+.conversation-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  padding: 28px 0 10px;
+  background: #f5f7fb;
+
+  box-shadow:
+    0 5px 10px
+    rgb(245 247 251 / 92%);
+}
+
+#playMenuPanel {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  right: auto;
+
+  width: min(
+    calc(100vw - 24px),
+    696px
+  );
+
+  transform: translateX(-50%);
+  z-index: 60;
+}
+
+/* ==========================================================================
+   END: STICKY TOP CONTROLS
+   ========================================================================== */
+
+
+/* ==========================================================================
+   🟦 BLOCK 2229: CURRENT SPEAKING BOX
+   ========================================================================== */
+
+.conversation-turn-card.is-speaking {
+  outline: 3px solid #facc15;
+  outline-offset: -3px;
+  background: #ffffff;
+}
+
+/* ==========================================================================
+   END: CURRENT SPEAKING BOX
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   🟦 BLOCK 2230: MIC PASS / RETRY RESULT
+   ========================================================================== */
+
+.conversation-turn-card.is-mic-pass {
+  outline: 3px solid #16a34a;
+  outline-offset: -3px;
+  background: #ffffff;
+}
+
+.conversation-turn-card.is-mic-retry {
+  outline: 3px solid #ef4444;
+  outline-offset: -3px;
+  background: #ffffff;
+}
+
+.conversation-mic-word-match {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.is-mic-pass .conversation-mic-word-match,
+.is-mic-retry .conversation-mic-word-match {
+  padding: 1px 2px;
+  border-radius: 3px;
+  background: #dcfce7;
+  color: #166534;
+  font-weight: 900;
+}
+
+.conversation-mic-result {
+  width: 100%;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+}
+
+.is-mic-pass .conversation-mic-result {
+  color: #15803d;
+}
+
+.is-mic-retry .conversation-mic-result {
+  color: #dc2626;
+}
+
+/* ==========================================================================
+   END: MIC PASS / RETRY RESULT
+   ========================================================================== */
+
+
+
+
+
+/* ==========================================================================
+   🟦 BLOCK 2231: ROLE PLAY TARGET SENTENCE
+   Purpose: Yellow outline only marks the sentence selected as the start.
+   ========================================================================== */
+
+.conversation-turn-card {
+  cursor: pointer;
+}
+
+.conversation-turn-card.is-role-target:not(
+  .is-mic-pass
+):not(
+  .is-mic-retry
+) {
+  outline: 3px solid #facc15;
+  outline-offset: -3px;
+  background: #ffffff;
+}
+
+/* ==========================================================================
+   END: ROLE PLAY TARGET SENTENCE
+   ========================================================================== */
+
+
+
+   /* ==========================================================================
+   🟦 BLOCK 2232: NO PLAY MENU PAGE FLOW
+   Purpose: The PLAY menu must never push, move, or scroll with lesson text.
+   ========================================================================== */
+
+/* PLAY menu positioning is fully owned by BLOCK 2225. */
+
+/* ==========================================================================
+   END: NO PLAY MENU PAGE FLOW
+   ========================================================================== */
+
+
+/* ==========================================================================
+   🟦 BLOCK 2233: BIBLE PERSON SPEAKER LINK
+   Purpose: Show only mapped speaker names as Bible detail links.
+   ========================================================================== */
+
+.conversation-turn-speaker.is-bible-person-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.conversation-turn-speaker.is-bible-person-link:active {
+  color: #064b87;
+}
+
+/* ==========================================================================
+   END: BIBLE PERSON SPEAKER LINK
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   🟦 BLOCK 2234: CURRENT TTS WORD HIGHLIGHT
+   Purpose: Highlight only the current word without changing its size or weight.
+   ========================================================================== */
+
+.conversation-tts-word {
+  padding: 0;
+  border-radius: 2px;
+  font: inherit;
+  transition: background-color 0.08s ease;
+}
+
+.conversation-tts-word.is-tts-current-word {
+  background: #fde68a;
+  color: inherit;
+  font-weight: inherit;
+}
+
+/* ==========================================================================
+   END: CURRENT TTS WORD HIGHLIGHT
+   ========================================================================== */
+
+
+/* ==========================================================================
+   🟦 BLOCK 2290: CONVERSATION DIRECTORY
+   Purpose: Hide directory completely after TITLE selection.
+   ========================================================================== */
+
+.conversation-directory {
+  display: grid;
+  gap: 8px;
+}
+
+.conversation-directory[hidden] {
+  display: none !important;
+}
+
+.conversation-directory-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.conversation-directory-breadcrumb button {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #075ea8;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.conversation-directory-breadcrumb span {
+  color: #94a3b8;
+}
+
+.conversation-directory-list {
+  display: grid;
+  border-top: 1px solid #cbd5e1;
+}
+
+.conversation-directory-item {
+  display: block;
+  width: 100%;
+  padding: 9px 2px;
+  border: 0;
+  border-bottom: 1px solid #dbe3ee;
+  border-radius: 0;
+  background: transparent;
+  color: #172033;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.conversation-directory-item:active {
+  background: #eaf5ff;
+  color: #075ea8;
+}
+
+.conversation-directory-item.is-directory-title {
+  color: #075ea8;
+  font-weight: 900;
+}
+
+.conversation-directory-empty {
+  padding: 10px 2px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.conversation-app.conversation-directory-open
+  .conversation-bottom-navigation,
+.conversation-app.conversation-directory-open
+  .conversation-lesson {
+  display: none;
+}
+
+/* ==========================================================================
+   END: CONVERSATION DIRECTORY
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   🟦 BLOCK 2291: DIRECTORY LOADING TEXT
+   Purpose: Show one loading line before the LEVEL index is ready.
+   ========================================================================== */
+
+.conversation-directory-loading {
+  margin: 18px 0 0;
+  padding: 10px 2px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+}
+
+/* ==========================================================================
+   END: DIRECTORY LOADING TEXT
+   ========================================================================== */
+
+
+
+/* ==========================================================================
+   🟩 BLOCK 2300: LESSON DISPLAY
+   ========================================================================== */
+
+/* ==========================================================================
+   🟦 BLOCK 2310: TURN CONTAINER
+   ========================================================================== */
+
+#conversationTurns {
+  display: grid;
+  gap: 0;
+}
+
+.conversation-turn-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  background: #ffffff;
+  line-height: 1.45;
+}
+
+.conversation-turn-speaker {
+  flex: 0 0 auto;
+  color: #075ea8;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.conversation-turn-text {
+  min-width: 0;
+  flex: 1 1 0;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+.conversation-secondary-line {
+  display: flex;
+  flex: 0 0 100%;
+  align-items: flex-start;
+  gap: 7px;
+  padding-top: 3px;
+}
+
+.conversation-secondary-speaker {
+  flex: 0 0 auto;
+  color: #075ea8;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.conversation-secondary-text {
+  min-width: 0;
+  flex: 1 1 0;
+  color: #172033;
+  font-size: 16px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   🟦 BLOCK 2320: COMPACT LESSON TITLE
+   ========================================================================== */
+
+#conversationStatus,
+.conversation-group {
+  display: none;
+}
+
+.conversation-title {
+  margin: 0 0 10px;
+  overflow: hidden;
+  color: #172033;
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   END: COMPACT LESSON TITLE
+   ========================================================================== */
+
+
+/* ==========================================================================
+   🟦 BLOCK 2330: SELECTED TURN CHUNK DISPLAY
+   ========================================================================== */
+
+.conversation-selected-chunks {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px dashed #93c5fd;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.conversation-selected-chunk-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.conversation-selected-chunk-line strong {
+  color: #075ea8;
+  font-weight: 900;
+}
+
+#chunkButton[aria-pressed="true"] {
+  border-color: #075ea8;
+  background: #eaf5ff;
+  color: #075ea8;
+}
+
+/* ==========================================================================
+   END: SELECTED TURN CHUNK DISPLAY
+   ========================================================================== */  
+
+
+.conversation-play-split #playButton:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  border-color: #d7dee8;
+  background: #eef2f7;
+  color: #8a94a6;
+}   
+
+#playMenuPanel .practice-reset-button {
+  grid-column: 1 / -1;
+  min-height: 36px;
+  border-color: #efb7b7;
+  background: #fff7f7;
+  color: #b42318;
+}
+
+#settingsPanel .conversation-settings-actions {
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+}
+
+#settingsPanel .conversation-settings-actions button {
+  min-height: 34px;
+}
+
+#settingsPanel .conversation-settings-actions button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ==========================================================================
+   🟦 BLOCK 2340: BUTTON HOVER FEEDBACK
+   Purpose: Show clear hover feedback on every active application button.
+   ========================================================================== */
+
+button:not(:disabled) {
+  transition:
+    background-color 0.12s ease,
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    filter 0.12s ease;
+}
+
+button:not(:disabled):hover {
+  filter: brightness(0.88);
+  box-shadow:
+    0 2px 8px
+    rgb(23 32 51 / 35%);
+}
+
+button:not(:disabled):active {
+  filter: brightness(0.80);
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   END: BUTTON HOVER FEEDBACK
+   ========================================================================== */
+
+
+/* ==========================================================================
+   BLOCK 2500 START : LICENSE WHITE BACKGROUND
+   ========================================================================== */
+
+html,
+body {
+  background: #fff !important;
+}
+
+body,
+#conversationApp,
+.conversation-app,
+.conversation-header,
+#conversationDirectory,
+#conversationLesson,
+#licenseLesson {
+  background: #fff !important;
+}
+
+#conversationApp,
+#conversationApp * {
+  font-family: "Segoe UI", "Malgun Gothic", sans-serif !important;
+  color: #222;
+  letter-spacing: normal !important;
+}
+
+#conversationApp button {
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   BLOCK 2500 END : LICENSE WHITE BACKGROUND
+   ========================================================================== */
+
+   /* ==========================================================================
+   BLOCK 2700 START : MOBILE LICENSE QUESTION CARD
+   ========================================================================== */
+
+#licenseProgressArea {
+  display: none;
+}
+
+#licenseQuestionContainer {
+  margin: 8px 0 10px;
+  padding: 12px;
+  border: 1px solid #d7dee8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+#licenseQuestionNumber {
+  display: inline-block;
+  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #27364d;
+  color: #fff !important;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+#licenseQuestionPrompt {
+  margin-bottom: 12px;
+}
+
+.license-question-line {
+  margin: 0;
+  color: #17233a !important;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.license-question-line + .license-question-line {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #cfd7e3;
+}
+
+#licenseQuestionChoices {
+  display: grid;
+  gap: 9px;
+}
+
+.license-choice {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-height: 62px;
+  padding: 9px 12px;
+  border: 1px solid #d7dee8;
+  border-radius: 11px;
+  background: #fff;
+  text-align: left;
+}
+
+.license-choice[aria-pressed="true"] {
+  border-color: #2196e5;
+  background: #eef8ff;
+}
+
+.license-choice-letter {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 50%;
+  background: #3498db;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.license-choice-content {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.license-choice-english {
+  color: #17233a !important;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.license-choice-korean {
+  color: #56657b !important;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* ==========================================================================
+   BLOCK 2700 END : MOBILE LICENSE QUESTION CARD
+   ========================================================================== */
+
+
+
+
+
+/* ==========================================================================
+   BLOCK 2800 START : ORIGINAL LICENSE BOTTOM BUTTONS
+   ========================================================================== */
+
+#licenseLesson ~ .conversation-bottom-navigation {
+  display: none;
+}
+
+#licenseLesson .nav-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+#licenseLesson .nav-btn {
+  flex: 1;
+  min-height: 48px;
+  padding: 12px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff !important;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#licenseLesson .btn-prev {
+  background: #3498db;
+}
+
+#licenseLesson .btn-skip {
+  background: #f39c12;
+}
+
+#licenseLesson .btn-next,
+#licenseLesson .btn-submit {
+  background: #2ecc71;
+}
+
+#licenseLesson .btn-quit {
+  background: #e74c3c;
+}
+
+#licenseLesson .nav-btn:disabled {
+  opacity: 0.4;
+}
+
+/* ==========================================================================
+   BLOCK 2800 END : ORIGINAL LICENSE BOTTOM BUTTONS
+   ========================================================================== */   
+
+
+   /* ==========================================================================
+   BLOCK 2900 START : LICENSE MODE BUTTON STATE
+   ========================================================================== */
+
+#settingsPanel [data-license-mode].is-active {
+  border-color: #075ea8;
+  background: #075ea8;
+  color: #fff !important;
+}
+
+/* ==========================================================================
+   BLOCK 2900 END : LICENSE MODE BUTTON STATE
+   ========================================================================== */
+
+
+
+
+/* ==========================================================================
+   BLOCK 2950 START : ORIGINAL LICENSE ANSWER STATES
+   ========================================================================== */
+
+#licenseLesson .choice.correct {
+  border-color: #27ae60;
+  background: #e9f7ef;
+}
+
+#licenseLesson .choice.correct .choice-letter {
+  background: #27ae60;
+}
+
+#licenseLesson .choice.incorrect .choice-letter {
+  background: #e74c3c;
+}
+
+#licenseLesson .choice.selected {
+  border-color: #3498db;
+  background: #eaf4fd;
+  box-shadow: 0 0 0 2px rgb(52 152 219 / 12%);
+}
+
+#licenseLesson .choice.disabled {
+  cursor: default;
+}
+
+#licenseLesson .explanation {
+  margin-top: 12px;
+  padding: 12px;
+  border-left: 5px solid #3498db;
+  border-radius: 10px;
+  background: #e8f4fc;
+  color: #17233a;
+}
+
+#licenseLesson .explanation strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #17233a !important;
+}
+
+#licenseLesson .explanation-language-line {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+#licenseLesson .explanation .language-line-ko {
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px dashed #cfd7e3;
+}
+
+/* ==========================================================================
+   BLOCK 2950 END : ORIGINAL LICENSE ANSWER STATES
+   ========================================================================== */  
+   
+   
+
+
+
+
+ /* ==========================================================================
+   BLOCK 2970 START : LICENSE TEMPLATE PLAY COMPATIBILITY
+   ========================================================================== */
+
+#licenseQuestionPrompt .license-prompt-card {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+#licenseQuestionPrompt .conversation-secondary-text {
+  display: block;
+}
+
+#licenseQuestionChoices .license-choice.conversation-turn-card {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+}
+
+#licenseQuestionChoices .conversation-secondary-text {
+  display: block;
+}
+
+#licenseLesson .conversation-turn-card.is-speaking {
+  outline-color: #facc15;
+}
+
+/* ==========================================================================
+   BLOCK 2970 END : LICENSE TEMPLATE PLAY COMPATIBILITY
+   ========================================================================== */  
+
+/* ==========================================================================
+   BLOCK 2980 START : EXPLAIN VISIBILITY TOGGLE
+   ========================================================================== */
+
+html[data-license-explain="off"]
+  #licenseQuestionFeedback {
+  display: none;
+}
+
+/* ==========================================================================
+   BLOCK 2980 END : EXPLAIN VISIBILITY TOGGLE
+   ========================================================================== */   
+
+
+ /* ========================================================================
+   BLOCK 2990 START : ORIGINAL LICENSE RESULT AND REVIEW MODALS
+   ======================================================================== */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgb(0 0 0 / 60%);
+}
+
+.modal-content {
+  width: min(100%, 700px);
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 24px;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 30%);
+}
+
+.modal-content h2 {
+  margin: 0 0 16px;
+  color: #111 !important;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.stat-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: #17233a;
+  font-size: 13px;
+  text-align: center;
+}
+
+.stat-value {
+  margin-top: 5px;
+  color: #27364d;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 250px;
+  margin: 15px 0;
+  overflow-y: auto;
+  padding: 5px;
+}
+
+.result-item {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #e9ceef;
+  color: #6c757d;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.result-item.correct {
+  background: #d4edda;
+  color: #0d4620;
+}
+
+.result-item.incorrect {
+  background: #f8d7da;
+  color: #5a1414;
+}
+
+.result-item.skipped {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.wrong-list {
+  max-height: 450px;
+  overflow-y: auto;
+}
+
+.wrong-item {
+  margin-bottom: 18px;
+  padding: 18px;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  background: #fff;
+  color: #17233a;
+  line-height: 1.55;
+}
+
+.wrong-item p {
+  margin: 10px 0;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+}
+
+.button-group .nav-btn {
+  flex: 1;
+}
+
+.btn-warning {
+  border: 0;
+  background: #e67e22;
+  color: #fff !important;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .result-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .button-group {
+    flex-wrap: wrap;
+  }
+
+  .button-group .nav-btn {
+    min-width: calc(50% - 5px);
+  }
+}
+
+/* ========================================================================
+   BLOCK 2990 END : ORIGINAL LICENSE RESULT AND REVIEW MODALS
+   ======================================================================== */  
+
+
+
+
+
+/* ==========================================================================
+   BLOCK 3000 START : LICENSE EXAM TIMER SETTINGS BUTTON
+   ========================================================================== */
+
+#settingsPanel > .conversation-setting-row {
+  grid-template-columns:
+    58px
+    minmax(0, 1fr)
+    40px
+    72px;
+}
+
+#settingsPanel #licenseExamTimerButton,
+#settingsPanel #licenseExamTimerReserveButton {
+  min-height: 34px;
+  padding: 5px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+#settingsPanel #licenseExamTimerButton:disabled,
+#settingsPanel #licenseExamTimerReserveButton:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+#settingsPanel #licenseExamTimerButton:not(:disabled) {
+  border-color: #075ea8;
+  background: #eaf5ff;
+  color: #075ea8;
+  cursor: pointer;
+}
+
+@media (max-width: 390px) {
+  #settingsPanel > .conversation-setting-row {
+    grid-template-columns:
+      58px
+      minmax(0, 1fr)
+      36px
+      62px;
+  }
+}
+
+/* ==========================================================================
+   BLOCK 3000 END : LICENSE EXAM TIMER SETTINGS BUTTON
+   ========================================================================== */
