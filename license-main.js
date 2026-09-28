@@ -1308,9 +1308,8 @@ function createCurrentPsgWebPlayAdapter() {
 
 
 // ============================================================================
-
 // 🟦 BLOCK 12800: ANDROID CHROME PLAY ADAPTER
-// Purpose: S26 cold-start TTS recovery. PC and APK do not enter here.
+// Purpose: Android Chrome TTS visual state and word highlight recovery.
 // ============================================================================
 
 function createCurrentPsgAndroidChromeAdapter_2() {
@@ -1333,6 +1332,7 @@ function createCurrentPsgAndroidChromeAdapter_2() {
         var attemptId = 0;
         var fallbackTimer = null;
         var startTimer = null;
+        var finishTimer = null;
 
         function clearTimers() {
           if (fallbackTimer !== null) {
@@ -1343,6 +1343,11 @@ function createCurrentPsgAndroidChromeAdapter_2() {
           if (startTimer !== null) {
             window.clearTimeout(startTimer);
             startTimer = null;
+          }
+
+          if (finishTimer !== null) {
+            window.clearTimeout(finishTimer);
+            finishTimer = null;
           }
         }
 
@@ -1357,9 +1362,30 @@ function createCurrentPsgAndroidChromeAdapter_2() {
           callback(value);
         }
 
+        function getVisualDurationMs() {
+          var wordCount = String(
+            item.speechText || ''
+          )
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .length;
+
+          return Math.max(
+            450,
+            Math.round(
+              wordCount *
+              340 /
+              getCurrentPsgPlayRate()
+            )
+          );
+        }
+
         function speakAttempt(retry) {
           var myAttempt = attemptId + 1;
           var started = false;
+          var visualFinishAt =
+            Date.now() + getVisualDurationMs();
 
           attemptId = myAttempt;
 
@@ -1396,8 +1422,10 @@ function createCurrentPsgAndroidChromeAdapter_2() {
               startTimer = null;
             }
 
-            fallbackTimer =
-              startCurrentPsgWebWordFallback();
+            if (fallbackTimer === null) {
+              fallbackTimer =
+                startCurrentPsgWebWordFallback();
+            }
           };
 
           utterance.onboundary = function(event) {
@@ -1425,11 +1453,33 @@ function createCurrentPsgAndroidChromeAdapter_2() {
 
           utterance.onend = function() {
             if (
-              !settled &&
-              myAttempt === attemptId
+              settled ||
+              myAttempt !== attemptId
             ) {
-              finish(resolve);
+              return;
             }
+
+            var waitMs = Math.max(
+              0,
+              visualFinishAt - Date.now()
+            );
+
+            if (waitMs === 0) {
+              finish(resolve);
+              return;
+            }
+
+            finishTimer = window.setTimeout(
+              function() {
+                if (
+                  !settled &&
+                  myAttempt === attemptId
+                ) {
+                  finish(resolve);
+                }
+              },
+              waitMs
+            );
           };
 
           utterance.onerror = function(error) {
@@ -1452,6 +1502,11 @@ function createCurrentPsgAndroidChromeAdapter_2() {
             synthesis.cancel();
             synthesis.resume();
             synthesis.speak(utterance);
+
+            if (fallbackTimer === null) {
+              fallbackTimer =
+                startCurrentPsgWebWordFallback();
+            }
 
             window.setTimeout(function() {
               if (
@@ -1493,6 +1548,8 @@ function createCurrentPsgAndroidChromeAdapter_2() {
     }
   };
 }
+
+// ============================================================================
 
 
 
