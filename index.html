@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+
+<!-- =========================================================================
+     BLOCK 1000 START : LICENSE DOCUMENT HEAD
+     ========================================================================= -->
+
+<head>
+
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Gongboo License</title>
+
+  <link
+    rel="stylesheet"
+    href="license-ui.css"
+  >
+
+</head>
+
+<!-- =========================================================================
+     BLOCK 1000 END : LICENSE DOCUMENT HEAD
+     ========================================================================= -->
+
+
+
+
+
+<!-- =========================================================================
+     CONTAINER START : CONVERSATION TEMPLATE APPLICATION SHELL
+     ========================================================================= -->
+
+<body>
+
+  <main
+    id="conversationApp"
+    class="conversation-app"
+  >
+
+
+
+
+
+ <!-- =====================================================================
+     BLOCK 1200 START : TEMPLATE HEADER CONTROLS
+     ===================================================================== -->
+
+<header class="conversation-header">
+
+  <div class="conversation-system-split">
+
+    <button
+      id="systemMenuButton"
+      type="button"
+      aria-label="Open system menu"
+      aria-controls="systemMenuPanel"
+      aria-expanded="false"
+    >
+      ▦
+    </button>
+
+  </div>
+
+
+  <div class="conversation-play-split">
+
+    <button
+      id="playButton"
+      type="button"
+      aria-label="Play current conversation"
+    >
+      PLAY
+    </button>
+
+    <button
+      id="playMenuButton"
+      type="button"
+      aria-label="Open play menu"
+      aria-controls="playMenuPanel"
+      aria-expanded="false"
+    >
+      ▾
+    </button>
+
+  </div>
+
+
+  <button
+    id="stopButton"
+    type="button"
+    aria-label="Stop playback and role play"
+  >
+    STOP
+  </button>
+
+
+  <a
+    id="licenseLoginButton"
+    href="login.html"
+    aria-label="Login"
+  >
+    LOGIN
+  </a>
+
+
+  <button
+    id="settingsButton"
+    type="button"
+    aria-label="Open settings"
+    aria-controls="settingsPanel"
+    aria-expanded="false"
+  >
+    ⚙
+  </button>
+
+</header>
+
+<!-- =====================================================================
+     BLOCK 1200 END : TEMPLATE HEADER CONTROLS
+     ===================================================================== -->
+
+
+
+
+    <!-- =====================================================================
+         BLOCK 1250 START : TEMPLATE SYSTEM MENU
+         ===================================================================== -->
+
+    <section
+      id="systemMenuPanel"
+      class="conversation-menu"
+      hidden
+    >
+
+      <button
+        type="button"
+        data-system-key="conversation"
+      >
+        CONVERSATION
+      </button>
+
+      <button
+        type="button"
+        data-system-key="license"
+      >
+        LICENSE
+      </button>
+
+      <button
+        type="button"
+        data-system-key="bible"
+      >
+        BIBLE
+      </button>
+
+      <button
+        type="button"
+        data-system-key="easyLearning"
+      >
+        EASY LEARNING
+      </button>
+
+    </section>
+
+    <!-- =====================================================================
+         BLOCK 1250 END : TEMPLATE SYSTEM MENU
+         ===================================================================== -->
+
+
+
+
+
+    <!-- =====================================================================
+         BLOCK 1300 START : TEMPLATE PLAY AND PRACTICE MENU
+         ===================================================================== -->
+
+    <section
+      id="playMenuPanel"
+      class="conversation-menu"
+      hidden
+    >
+
+      <button
+        id="playModeToggleButton"
+        class="play-mode-toggle"
+        type="button"
+        aria-pressed="false"
+      >
+        COMPUTER
+      </button>
+
+      <button
+        id="practiceStartStopButton"
+        class="practice-start-stop-toggle"
+        type="button"
+        aria-pressed="false"
+      >
+        START
+      </button>
+
+      <button
+        id="practiceModeToggleButton"
+        class="play-practice-toggle"
+        type="button"
+        aria-pressed="false"
+      >
+        ROLE PLAY
+      </button>
+
+      <button
+        id="continueNextButton"
+        class="continue-next-toggle"
+        type="button"
+        aria-pressed="false"
+      >
+        CONTINUE: OFF
+      </button>
+
+      <button
+        id="practiceResetButton"
+        class="practice-reset-button"
+        type="button"
+      >
+        RESET
+      </button>
+
+    </section>
+
+    <!-- =====================================================================
+         BLOCK 1300 END : TEMPLATE PLAY AND PRACTICE MENU
+         ===================================================================== -->
+
+
+
+
+
+ <!-- =====================================================================
+     BLOCK 1350 START : TEMPLATE SETTINGS MENU
+     ===================================================================== -->
+
+<section
+  id="settingsPanel"
+  class="conversation-menu"
+  hidden
+>
+
+  <label class="conversation-setting-row">
+
+    <span>PASS</span>
+
+    <input
+      id="passRange"
+      type="range"
+      min="0"
+      max="100"
+      step="1"
+      value="0"
+      aria-label="Pass score"
+    >
+
+    <output id="passValue">0%</output>
+
+    <button
+      id="licenseExamTimerButton"
+      type="button"
+      disabled
+      aria-disabled="true"
+    >
+      ⏱ TIMER
+    </button>
+
+  </label>
+
+
+  <label class="conversation-setting-row">
+
+    <span>MIC DELAY</span>
+
+    <input
+      id="delayRange"
+      type="range"
+      min="0.5"
+      max="10"
+      step="0.5"
+      value="0.5"
+      aria-label="Microphone delay"
+    >
+
+    <output id="delayValue">0.5s</output>
+
+    <button
+      id="licenseExamTimerReserveButton"
+      type="button"
+      disabled
+      aria-disabled="true"
+    >
+      —
+    </button>
+
+  </label>
+
+
+  <div class="conversation-speed-loop-row">
+
+    <label class="conversation-setting-row">
+
+      <span>SPEED</span>
+
+      <input
+        id="speechSpeedRange"
+        type="range"
+        min="0.5"
+        max="1.5"
+        step="0.1"
+        value="1"
+        aria-label="Speech speed"
+      >
+
+    </label>
+
+
+    <button
+      id="playLoopToggle"
+      type="button"
+      aria-label="Repeat current passage"
+      aria-pressed="false"
+    >
+      ↻ OFF
+    </button>
+
+  </div>
+
+
+  <div class="conversation-language-row">
+
+    <span class="conversation-language-label">
+      LANG
+    </span>
+
+
+    <label class="conversation-language-choice">
+
+      <span>1ST</span>
+
+      <select
+        id="primaryLanguageSelect"
+        aria-label="Primary language"
+      >
+        <option value="EN">EN</option>
+        <option value="KO">KO</option>
+      </select>
+
+    </label>
+
+
+    <label class="conversation-language-choice">
+
+      <span>2ND</span>
+
+      <select
+        id="secondaryLanguageSelect"
+        aria-label="Secondary language"
+      >
+        <option value="NONE">NONE</option>
+        <option value="EN">EN</option>
+        <option value="KO">KO</option>
+      </select>
+
+    </label>
+
+  </div>
+
+
+  <div class="conversation-settings-actions">
+
+    <button
+      id="chunkButton"
+      type="button"
+    >
+      CHUNK
+    </button>
+
+    <button
+      id="psgButton"
+      type="button"
+      disabled
+      aria-disabled="true"
+    >
+      PSG
+    </button>
+
+    <button
+      id="licenseExplainToggle"
+      type="button"
+      aria-pressed="true"
+    >
+      EXPLAIN: ON
+    </button>
+
+  </div>
+
+
+  <div class="conversation-settings-actions">
+
+    <button
+      type="button"
+      data-license-mode="learn"
+    >
+      LEARN
+    </button>
+
+    <button
+      type="button"
+      data-license-mode="study"
+    >
+      STUDY
+    </button>
+
+    <button
+      type="button"
+      data-license-mode="exam"
+    >
+      EXAM
+    </button>
+
+  </div>
+
+</section>
+
+<!-- =====================================================================
+     BLOCK 1350 END : TEMPLATE SETTINGS MENU
+     ===================================================================== -->
+
+
+         
+
+         
+
+
+
+
+    <!-- =====================================================================
+         BLOCK 1400 START : TEMPLATE DIRECTORY
+         License 과목 목록도 이 Template 영역을 재사용한다.
+         ===================================================================== -->
+
+    <section
+      id="conversationDirectory"
+      class="conversation-directory"
+      aria-label="Conversation directory"
+    >
+
+      <nav
+        id="conversationDirectoryBreadcrumb"
+        class="conversation-directory-breadcrumb"
+        aria-label="Directory path"
+      ></nav>
+
+
+      <div
+        id="conversationDirectoryList"
+        class="conversation-directory-list"
+      ></div>
+
+    </section>
+
+    <!-- =====================================================================
+         BLOCK 1400 END : TEMPLATE DIRECTORY
+         ===================================================================== -->
+
+
+
+
+
+    <!-- =====================================================================
+         BLOCK 1450 START : TEMPLATE LESSON AREA
+         ===================================================================== -->
+
+    <section
+      id="conversationStatus"
+      class="conversation-status"
+      aria-live="polite"
+    >
+      Ready
+    </section>
+
+
+    <section
+      id="conversationLesson"
+      class="conversation-lesson"
+      hidden
+    >
+
+      <div id="conversationMeta"></div>
+
+      <div id="conversationTurns"></div>
+
+    </section>
+
+    <!-- =====================================================================
+         BLOCK 1450 END : TEMPLATE LESSON AREA
+         ===================================================================== -->
+
+
+
+
+    <!-- =====================================================================
+     BLOCK 1480 START : LICENSE QUESTION TEMPLATE AREA
+     ===================================================================== -->
+
+<section
+  id="licenseLesson"
+  class="conversation-lesson"
+  hidden
+>
+
+  <div
+    id="licenseProgressArea"
+    class="conversation-status"
+  >
+
+    <div
+      id="licenseProgressText"
+      aria-live="polite"
+    ></div>
+
+  </div>
+
+
+  <div id="licenseQuestionContainer">
+
+    <div id="licenseQuestionNumber"></div>
+
+    <div id="licenseQuestionPrompt"></div>
+
+    <div id="licenseQuestionChoices"></div>
+
+    <div id="licenseQuestionFeedback"></div>
+
+  </div>
+
+
+  <div class="nav-buttons">
+
+    <button
+      id="prevBtn"
+      class="nav-btn btn-prev"
+      type="button"
+    >
+      ◀ PREV (P)
+    </button>
+
+    <button
+      id="skipBtn"
+      class="nav-btn btn-skip"
+      type="button"
+    >
+      SKIP (S)
+    </button>
+
+    <button
+      id="nextBtn"
+      class="nav-btn btn-next"
+      type="button"
+    >
+      NEXT (N) ▶
+    </button>
+
+  </div>
+
+
+  <div class="nav-buttons license-submit-row">
+
+    <button
+      id="submitBtn"
+      class="nav-btn btn-submit"
+      type="button"
+      hidden
+    >
+      SUBMIT (Enter)
+    </button>
+
+    <button
+      id="quitBtn"
+      class="nav-btn btn-quit"
+      type="button"
+    >
+      ✕ QUIT
+    </button>
+
+  </div>
+
+</section>
+
+<!-- =====================================================================
+     BLOCK 1480 END : LICENSE QUESTION TEMPLATE AREA
+     ===================================================================== -->       
+
+
+<!-- =====================================================================
+     BLOCK 1490 START : ORIGINAL LICENSE RESULT AND REVIEW MODALS
+     ===================================================================== -->
+
+<div
+  id="resultModal"
+  class="modal"
+>
+
+  <div class="modal-content">
+
+    <h2 style="text-align:center">
+      📊 RESULT
+    </h2>
+
+
+    <div class="stats">
+
+      <div class="stat-card">
+
+        <div>✅ CORRECT</div>
+
+        <div
+          id="correctCount"
+          class="stat-value"
+        >
+          0 / 0
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div>🎯 ACCURACY</div>
+
+        <div
+          id="accuracyRate"
+          class="stat-value"
+        >
+          0%
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div>
+      <strong>Results (Click to move)</strong>
+    </div>
+
+    <div
+      id="resultGrid"
+      class="result-grid"
+    ></div>
+
+
+    <div class="button-group">
+
+      <button
+        id="retryAllBtn"
+        class="nav-btn btn-prev"
+        type="button"
+      >
+        🔄 RETRY
+      </button>
+
+      <button
+        id="reviewWrongBtn"
+        class="nav-btn btn-warning"
+        type="button"
+      >
+        📝 REVIEW
+      </button>
+
+      <button
+        id="closeModalBtn"
+        class="nav-btn btn-prev"
+        type="button"
+      >
+        ✕ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div
+  id="wrongModal"
+  class="modal"
+>
+
+  <div class="modal-content">
+
+    <h2 style="text-align:center">
+      📝 REVIEW
+    </h2>
+
+    <p
+      style="
+        text-align:center;
+        margin-bottom:15px;
+        color:#666;
+      "
+    >
+      Wrong / Skipped / Unanswered
+    </p>
+
+
+    <div
+      id="wrongList"
+      class="wrong-list"
+    ></div>
+
+
+    <div class="button-group">
+
+      <button
+        id="retryWrongFromReviewBtn"
+        class="nav-btn btn-warning"
+        type="button"
+      >
+        🔄 RETRY WRONG ONLY
+      </button>
+
+      <button
+        id="closeWrongBtn"
+        class="nav-btn btn-prev"
+        type="button"
+      >
+        ✕ CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- =====================================================================
+     BLOCK 1490 END : ORIGINAL LICENSE RESULT AND REVIEW MODALS
+     ===================================================================== -->
+
+
+
+    <!-- =====================================================================
+         BLOCK 1500 START : TEMPLATE BOTTOM NAVIGATION
+         ===================================================================== -->
+
+    <nav
+      class="conversation-bottom-navigation"
+      aria-label="Passage navigation"
+    >
+
+      <button
+        id="previousButton"
+        type="button"
+      >
+        ◀ PREV
+      </button>
+
+      <button
+        id="nextButton"
+        type="button"
+      >
+        NEXT ▶
+      </button>
+
+    </nav>
+
+    <!-- =====================================================================
+         BLOCK 1500 END : TEMPLATE BOTTOM NAVIGATION
+         ===================================================================== -->
+
+
+
+
+
+    <!-- =====================================================================
+         BLOCK 1550 START : TEMPLATE FOOTER
+         ===================================================================== -->
+
+    <footer class="conversation-footer">
+      GONGBOO.ORG : EASY LEARNING
+    </footer>
+
+    <!-- =====================================================================
+         BLOCK 1550 END : TEMPLATE FOOTER
+         ===================================================================== -->
+
+  </main>
+
+</body>
+
+<!-- =========================================================================
+     CONTAINER END : CONVERSATION TEMPLATE APPLICATION SHELL
+     ========================================================================= -->
+
+
+
+
+<!-- =========================================================================
+     BLOCK 1900 START : LICENSE RUNTIME
+     ========================================================================= -->
+
+<script src="config.js"></script>
+<script src="license-main.js"></script>
+
+<!-- =========================================================================
+     BLOCK 1900 END : LICENSE RUNTIME
+     ========================================================================= -->
