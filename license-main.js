@@ -629,6 +629,7 @@ function getCurrentPsgSpeechText(
 }
 
 
+// ============================================================================
 // 🟦 BLOCK 11900: VISIBLE SCREEN PLAY SEQUENCE
 // ============================================================================
 
@@ -686,7 +687,7 @@ function buildCurrentPsgPlaySequence() {
 
   Array.from(
     document.querySelectorAll(
-      '.conversation-turn-card'
+      '#licenseLesson .conversation-turn-card'
     )
   ).forEach(function(card, index) {
     var turnNumber =
@@ -753,8 +754,11 @@ function buildCurrentPsgPlaySequence() {
   return sequence;
 }
 
-
 // ============================================================================
+// 🟦 BLOCK 11900 END: VISIBLE SCREEN PLAY SEQUENCE
+// ============================================================================
+
+
 
 
 // ============================================================================
