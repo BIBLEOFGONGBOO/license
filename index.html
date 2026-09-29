@@ -276,7 +276,6 @@
 
   </label>
 
-
   <label class="conversation-setting-row">
 
     <span>MIC DELAY</span>
@@ -304,7 +303,6 @@
 
   </label>
 
-
   <div class="conversation-speed-loop-row">
 
     <label class="conversation-setting-row">
@@ -323,7 +321,6 @@
 
     </label>
 
-
     <button
       id="playLoopToggle"
       type="button"
@@ -335,13 +332,11 @@
 
   </div>
 
-
   <div class="conversation-language-row">
 
     <span class="conversation-language-label">
       LANG
     </span>
-
 
     <label class="conversation-language-choice">
 
@@ -351,12 +346,11 @@
         id="primaryLanguageSelect"
         aria-label="Primary language"
       >
-        <option value="EN">EN</option>
-        <option value="KO">KO</option>
+        <option value="EN">English</option>
+        <option value="KO">Korean</option>
       </select>
 
     </label>
-
 
     <label class="conversation-language-choice">
 
@@ -366,15 +360,14 @@
         id="secondaryLanguageSelect"
         aria-label="Secondary language"
       >
-        <option value="NONE">NONE</option>
-        <option value="EN">EN</option>
-        <option value="KO">KO</option>
+        <option value="NONE">None</option>
+        <option value="EN">English</option>
+        <option value="KO">Korean</option>
       </select>
 
     </label>
 
   </div>
-
 
   <div class="conversation-settings-actions">
 
@@ -403,7 +396,6 @@
     </button>
 
   </div>
-
 
   <div class="conversation-settings-actions">
 
@@ -435,8 +427,6 @@
 <!-- =====================================================================
      BLOCK 1350 END : TEMPLATE SETTINGS MENU
      ===================================================================== -->
-
-
          
 
          
@@ -779,6 +769,62 @@
     <!-- =====================================================================
          BLOCK 1500 END : TEMPLATE BOTTOM NAVIGATION
          ===================================================================== -->
+
+
+
+
+<!-- =====================================================================
+     BLOCK 1520 START : LICENSE AI TUTOR
+     ===================================================================== -->
+
+<section
+  id="licenseTutorPanel"
+  class="license-tutor-panel"
+  hidden
+  aria-label="AI Tutor"
+>
+  <div class="license-tutor-heading">
+    <div>
+      <h3>💬 AI TUTOR</h3>
+
+      <p id="licenseTutorSubtitle">
+        Ask about the current question.
+      </p>
+    </div>
+
+    <span class="license-tutor-badge">
+      CURRENT COURSE
+    </span>
+  </div>
+
+  <div class="license-tutor-compose">
+    <input
+      id="licenseTutorQuestion"
+      type="text"
+      autocomplete="off"
+      placeholder="Ask about this question..."
+    >
+
+    <button
+      id="licenseTutorSend"
+      type="button"
+    >
+      ⏎ SEND
+    </button>
+  </div>
+
+  <div
+    id="licenseTutorResponse"
+    class="license-tutor-response"
+    aria-live="polite"
+  >
+    💡 Ask about the current License question.
+  </div>
+</section>
+
+<!-- =====================================================================
+     BLOCK 1520 END : LICENSE AI TUTOR
+     ===================================================================== -->
 
 
 

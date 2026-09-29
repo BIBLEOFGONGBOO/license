@@ -549,7 +549,7 @@
                         id="changeNewPassword"
                         type="password"
                         autocomplete="new-password"
-                        placeholder="4 characters"
+                        placeholder="At least 6 characters"
                     >
 
                     <button
@@ -757,7 +757,7 @@
 
                     saveLicenseSession(session);
 
-                    window.location.href = 'license-index.html';
+                    window.location.href = 'index.html';
                 } catch (error) {
                     showResult(
                         'loginResult',
@@ -848,7 +848,7 @@
                     if (result.access_token) {
                         saveLicenseSession(result);
 
-                        window.location.href = 'license-index.html';
+                        window.location.href = 'index.html';
 
                         return;
                     }

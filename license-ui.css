@@ -1675,3 +1675,207 @@ html[data-license-explain="off"]
 /* ==========================================================================
    BLOCK 3010 END : KAKAO EXTERNAL BROWSER GUIDE
    ========================================================================== */   
+
+
+
+
+
+  /* ==========================================================================
+   BLOCK 3020 START : LICENSE WORD DICTIONARY UI
+   ========================================================================== */
+
+.license-dictionary-word,
+.conversation-tts-word {
+  border-radius: 3px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.license-dictionary-word.is-dictionary-selected,
+.conversation-tts-word.is-dictionary-selected {
+  background: #fde68a;
+  box-shadow: inset 0 -2px 0 #f59e0b;
+}
+
+.license-dictionary-popup {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  z-index: 10001;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 14px 38px rgb(15 23 42 / 28%);
+  color: #172033;
+}
+
+.license-dictionary-popup[hidden] {
+  display: none;
+}
+
+.license-dictionary-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 18px;
+}
+
+.license-dictionary-word-title {
+  margin: 0 42px 10px 0;
+  color: #075ea8;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.license-dictionary-base,
+.license-dictionary-korean,
+.license-dictionary-definition,
+.license-dictionary-status {
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.license-dictionary-korean {
+  color: #b45309;
+  font-weight: 800;
+}
+
+.license-dictionary-definition {
+  color: #334155;
+  white-space: pre-line;
+}
+
+/* ==========================================================================
+   BLOCK 3020 END : LICENSE WORD DICTIONARY UI
+   ========================================================================== */ 
+
+
+
+
+   /* ==========================================================================
+   BLOCK 3030 START : LICENSE AI TUTOR UI
+   ========================================================================== */
+
+.license-tutor-panel {
+  width: min(100%, 900px);
+  margin: 18px auto 22px;
+  padding: 16px;
+  border: 1px solid #e1e6ec;
+  border-top: 3px solid #f5a623;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 9px 24px rgb(15 23 42 / 8%);
+}
+
+.license-tutor-panel[hidden] {
+  display: none !important;
+}
+
+.license-tutor-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.license-tutor-heading h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+}
+
+#licenseTutorSubtitle {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.license-tutor-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid #f5d28b;
+  border-radius: 20px;
+  background: #fff8eb;
+  color: #b87500;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.license-tutor-compose {
+  display: flex;
+  gap: 8px;
+}
+
+#licenseTutorQuestion {
+  min-width: 0;
+  flex: 1;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #172033;
+  font: inherit;
+}
+
+#licenseTutorSend {
+  min-width: 82px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #f5a623;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+#licenseTutorSend:disabled,
+#licenseTutorQuestion:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.license-tutor-response {
+  min-height: 68px;
+  margin-top: 10px;
+  padding: 14px;
+  border-left: 4px solid #f5a623;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #172033;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 480px) {
+  .license-tutor-heading {
+    flex-direction: column;
+  }
+
+  .license-tutor-compose {
+    flex-direction: column;
+  }
+
+  #licenseTutorSend {
+    width: 100%;
+  }
+}
+
+/* ==========================================================================
+   BLOCK 3030 END : LICENSE AI TUTOR UI
+   ========================================================================== */

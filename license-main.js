@@ -7591,6 +7591,654 @@ function installLicenseResults() {
 
 
 
+/* ========================================================================
+   BLOCK 32100 START : LICENSE WORD DICTIONARY
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  var dictionaryState = {
+    selectedWord: ''
+  };
+
+  var dictionaryLanguageColumns = {
+    KO: { column: 'Korean', label: 'Korean' },
+    JA: { column: 'Japanese', label: 'Japanese' },
+    ZH: { column: 'Chinese', label: 'Chinese' },
+    ES: { column: 'Spanish', label: 'Spanish' },
+    FR: { column: 'French', label: 'French' },
+    DE: { column: 'German', label: 'German' },
+    IT: { column: 'Italian', label: 'Italian' },
+    PT: { column: 'Portuguese', label: 'Portuguese' },
+    RU: { column: 'Russian', label: 'Russian' },
+    AR: { column: 'Arabic', label: 'Arabic' },
+    HI: { column: 'Hindi', label: 'Hindi' },
+    BN: { column: 'Bengali', label: 'Bengali' },
+    UR: { column: 'Urdu', label: 'Urdu' },
+    FA: { column: 'Persian', label: 'Persian' },
+    TR: { column: 'Turkish', label: 'Turkish' },
+    VI: { column: 'Vietnamese', label: 'Vietnamese' },
+    TH: { column: 'Thai', label: 'Thai' },
+    ID: { column: 'Indonesian', label: 'Indonesian' },
+    MS: { column: 'Malay', label: 'Malay' },
+    TL: { column: 'Tagalog', label: 'Tagalog' },
+    SW: { column: 'Swahili', label: 'Swahili' },
+    HA: { column: 'Hausa', label: 'Hausa' },
+    NL: { column: 'Dutch', label: 'Dutch' },
+    PL: { column: 'Polish', label: 'Polish' },
+    UK: { column: 'Ukrainian', label: 'Ukrainian' },
+    RO: { column: 'Romanian', label: 'Romanian' },
+    CS: { column: 'Czech', label: 'Czech' },
+    SV: { column: 'Swedish', label: 'Swedish' },
+    NO: { column: 'Norwegian', label: 'Norwegian' },
+    DA: { column: 'Danish', label: 'Danish' },
+    FI: { column: 'Finnish', label: 'Finnish' },
+    EL: { column: 'Greek', label: 'Greek' },
+    HE: { column: 'Hebrew', label: 'Hebrew' },
+    HU: { column: 'Hungarian', label: 'Hungarian' },
+    BG: { column: 'Bulgarian', label: 'Bulgarian' },
+    SR: { column: 'Serbian', label: 'Serbian' },
+    HR: { column: 'Croatian', label: 'Croatian' },
+    SK: { column: 'Slovak', label: 'Slovak' },
+    SL: { column: 'Slovenian', label: 'Slovenian' },
+    LT: { column: 'Lithuanian', label: 'Lithuanian' },
+    LV: { column: 'Latvian', label: 'Latvian' },
+    ET: { column: 'Estonian', label: 'Estonian' },
+    CA: { column: 'Catalan', label: 'Catalan' },
+    EU: { column: 'Basque', label: 'Basque' },
+    AZ: { column: 'Azerbaijani', label: 'Azerbaijani' },
+    UZ: { column: 'Uzbek', label: 'Uzbek' },
+    KK: { column: 'Kazakh', label: 'Kazakh' },
+    KY: { column: 'Kyrgyz', label: 'Kyrgyz' },
+    TA: { column: 'Tamil', label: 'Tamil' }
+  };
+
+  function getDictionaryConfig() {
+    return window.LICENSE_CONFIG &&
+      window.LICENSE_CONFIG.dictionary
+      ? window.LICENSE_CONFIG.dictionary
+      : null;
+  }
+
+  function getDictionaryTranslationLanguage() {
+    var select = document.getElementById(
+      'secondaryLanguageSelect'
+    );
+
+    var code = String(
+      select ? select.value : ''
+    )
+      .trim()
+      .toUpperCase();
+
+    return dictionaryLanguageColumns[code] || null;
+  }
+
+  function normalizeDictionaryWord(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^[^a-z]+|[^a-z'-]+$/g, '');
+  }
+
+  function getDictionaryPopup() {
+    var popup = document.getElementById(
+      'licenseDictionaryPopup'
+    );
+
+    if (popup) {
+      return popup;
+    }
+
+    popup = document.createElement('aside');
+
+    popup.id = 'licenseDictionaryPopup';
+
+    popup.className =
+      'license-dictionary-popup';
+
+    popup.hidden = true;
+
+    popup.innerHTML = [
+      '<button class="license-dictionary-close"',
+      ' type="button" aria-label="Close dictionary">×</button>',
+      '<div class="license-dictionary-word-title"></div>',
+      '<div class="license-dictionary-base"></div>',
+      '<div class="license-dictionary-korean"></div>',
+      '<div class="license-dictionary-definition"></div>',
+      '<div class="license-dictionary-status"></div>'
+    ].join('');
+
+    popup.querySelector(
+      '.license-dictionary-close'
+    ).onclick = function () {
+      popup.hidden = true;
+    };
+
+    document.body.appendChild(popup);
+
+    return popup;
+  }
+
+  function showDictionaryMessage(message) {
+    var popup = getDictionaryPopup();
+
+    popup.querySelector(
+      '.license-dictionary-word-title'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-base'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-korean'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-definition'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-status'
+    ).textContent = message;
+
+    popup.hidden = false;
+  }
+
+  function showDictionaryEntry(
+    entry,
+    translationLanguage
+  ) {
+    var popup = getDictionaryPopup();
+
+    var word = String(
+      entry.Search_Word || ''
+    );
+
+    var base = String(
+      entry.Base_English || ''
+    );
+
+    var translation = translationLanguage
+      ? String(
+        entry[translationLanguage.column] || ''
+      ).trim()
+      : '';
+
+    popup.querySelector(
+      '.license-dictionary-word-title'
+    ).textContent = word;
+
+    popup.querySelector(
+      '.license-dictionary-base'
+    ).textContent = base && base !== word
+      ? 'Base: ' + base
+      : '';
+
+    popup.querySelector(
+      '.license-dictionary-korean'
+    ).textContent =
+      translationLanguage && translation
+        ? translationLanguage.label +
+          ': ' +
+          translation
+        : '';
+
+    popup.querySelector(
+      '.license-dictionary-definition'
+    ).textContent = String(
+      entry.English_Definition || ''
+    ).replace(/\s*\|\s*/g, '\n• ');
+
+    popup.querySelector(
+      '.license-dictionary-status'
+    ).textContent =
+      translationLanguage && !translation
+        ? translationLanguage.label +
+          ' translation is not registered.'
+        : '';
+
+    popup.hidden = false;
+  }
+
+  async function fetchDictionaryEntry(
+    word,
+    translationLanguage
+  ) {
+    var config = getDictionaryConfig();
+
+    if (!config || !word) {
+      return null;
+    }
+
+    var fields = [
+      'Search_Word',
+      'Base_English',
+      'Word_Forms',
+      'English_Definition'
+    ];
+
+    if (translationLanguage) {
+      fields.push(
+        translationLanguage.column
+      );
+    }
+
+    var params = new URLSearchParams();
+
+    params.set('select', fields.join(','));
+
+    params.set(
+      'or',
+      [
+        '(Search_Word.ilike.' + word,
+        'Base_English.ilike.' + word + ')'
+      ].join(',')
+    );
+
+    params.set('limit', '1');
+
+    var requestUrl =
+      config.url +
+      '/rest/v1/' +
+      config.table +
+      '?' +
+      params.toString();
+
+    var headers = {
+      apikey: config.publishableKey,
+      Authorization:
+        'Bearer ' + config.publishableKey
+    };
+
+    var response = await fetch(
+      requestUrl,
+      { headers: headers }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        'Dictionary lookup failed: ' +
+        String(response.status)
+      );
+    }
+
+    var rows = await response.json();
+
+    if (rows.length) {
+      return rows[0];
+    }
+
+    params.set(
+      'Word_Forms',
+      'ilike.*' + word + '*'
+    );
+
+    requestUrl =
+      config.url +
+      '/rest/v1/' +
+      config.table +
+      '?' +
+      params.toString();
+
+    response = await fetch(
+      requestUrl,
+      { headers: headers }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    rows = await response.json();
+
+    return rows.length ? rows[0] : null;
+  }
+
+  function clearDictionarySelection() {
+    document
+      .querySelectorAll(
+        '.is-dictionary-selected'
+      )
+      .forEach(function (element) {
+        element.classList.remove(
+          'is-dictionary-selected'
+        );
+      });
+  }
+
+  function tokenizeDictionaryLine(line) {
+    if (
+      !line ||
+      line.querySelector(
+        '.license-dictionary-word, .conversation-tts-word'
+      )
+    ) {
+      return;
+    }
+
+    var text = String(line.textContent || '');
+
+    if (!/[a-z]/i.test(text)) {
+      return;
+    }
+
+    var fragment = document.createDocumentFragment();
+
+    text.split(/(\s+|[^a-zA-Z'-]+)/).forEach(
+      function (part) {
+        if (!part) {
+          return;
+        }
+
+        if (/[a-z]/i.test(part)) {
+          var word = document.createElement('span');
+
+          word.className =
+            'license-dictionary-word';
+
+          word.textContent = part;
+
+          fragment.appendChild(word);
+
+          return;
+        }
+
+        fragment.appendChild(
+          document.createTextNode(part)
+        );
+      }
+    );
+
+    line.replaceChildren(fragment);
+  }
+
+  function tokenizeLicenseDictionaryWords() {
+    document
+      .querySelectorAll(
+        '#licenseLesson .language-line-en'
+      )
+      .forEach(function (line) {
+        if (
+          line.closest(
+            '.conversation-turn-card.is-speaking'
+          )
+        ) {
+          return;
+        }
+
+        tokenizeDictionaryLine(line);
+      });
+  }
+
+  function installLicenseDictionary() {
+    tokenizeLicenseDictionaryWords();
+
+    var lesson = document.getElementById(
+      'licenseLesson'
+    );
+
+    if (lesson) {
+      new MutationObserver(function () {
+        window.setTimeout(
+          tokenizeLicenseDictionaryWords,
+          0
+        );
+      }).observe(lesson, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    document.addEventListener(
+      'click',
+      async function (event) {
+        var element = event.target.closest(
+          '.license-dictionary-word, .conversation-tts-word'
+        );
+
+        if (!element) {
+          return;
+        }
+
+        var word = normalizeDictionaryWord(
+          element.textContent
+        );
+
+        if (!word) {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (dictionaryState.selectedWord === word) {
+          var translationLanguage =
+            getDictionaryTranslationLanguage();
+
+          showDictionaryMessage(
+            'Searching for "' + word + '"...'
+          );
+
+          try {
+            var entry = await fetchDictionaryEntry(
+              word,
+              translationLanguage
+            );
+
+            if (entry) {
+              showDictionaryEntry(
+                entry,
+                translationLanguage
+              );
+            } else {
+              showDictionaryMessage(
+                '"' + word + '" 사전 항목이 없습니다.'
+              );
+            }
+          } catch (error) {
+            showDictionaryMessage(
+              '사전을 불러오지 못했습니다.'
+            );
+          }
+
+          return;
+        }
+
+        clearDictionarySelection();
+
+        element.classList.add(
+          'is-dictionary-selected'
+        );
+
+        dictionaryState.selectedWord = word;
+      }
+    );
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      installLicenseDictionary,
+      { once: true }
+    );
+  } else {
+    installLicenseDictionary();
+  }
+})();
+
+/* ========================================================================
+   BLOCK 32100 END : LICENSE WORD DICTIONARY
+   ======================================================================== */
+
+
+
+
+/* ========================================================================
+   BLOCK 32110 START : LICENSE PLAYING BUTTON STATE
+   PLAY는 재생 중 PLAYING으로 비활성화한다.
+   중지는 기존 오른쪽 붉은 STOP 버튼이 담당한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  function installLicensePlayingButtonState() {
+    var originalRender =
+      renderCurrentPsgPlayButton;
+
+    renderCurrentPsgPlayButton = function () {
+      originalRender();
+
+      var button = document.getElementById(
+        'playButton'
+      );
+
+      var state =
+        getCurrentPsgPlayState();
+
+      if (!button) {
+        return;
+      }
+
+      button.textContent = state.running
+        ? 'PLAYING'
+        : 'PLAY';
+
+      button.disabled = state.running;
+
+      button.setAttribute(
+        'aria-disabled',
+        String(state.running)
+      );
+
+      button.setAttribute(
+        'aria-pressed',
+        String(state.running)
+      );
+    };
+
+    renderCurrentPsgPlayButton();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      installLicensePlayingButtonState,
+      { once: true }
+    );
+  } else {
+    installLicensePlayingButtonState();
+  }
+})();
+
+/* ========================================================================
+   BLOCK 32110 END : LICENSE PLAYING BUTTON STATE
+   ======================================================================== */
+
+
+
+/* ========================================================================
+   BLOCK 32120 START : LICENSE AUTO NEXT SHORTCUT
+   기존 템플릿 PLAY 메뉴는 보존한다.
+   License에서는 역삼각형만 비활성화하고,
+   MIC DELAY 오른쪽 빈 버튼을 AUTO NEXT로 재사용한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  function installLicenseAutoNextShortcut() {
+    var playMenuButton = document.getElementById(
+      'playMenuButton'
+    );
+
+    var autoNextButton = document.getElementById(
+      'licenseExamTimerReserveButton'
+    );
+
+    var templateContinueButton = document.getElementById(
+      'continueNextButton'
+    );
+
+    if (playMenuButton) {
+      playMenuButton.disabled = true;
+
+      playMenuButton.setAttribute(
+        'aria-disabled',
+        'true'
+      );
+
+      playMenuButton.setAttribute(
+        'aria-expanded',
+        'false'
+      );
+    }
+
+    if (
+      !autoNextButton ||
+      !templateContinueButton
+    ) {
+      return;
+    }
+
+    function renderAutoNextButton() {
+      autoNextButton.textContent =
+        licenseContinueNext
+          ? 'AUTO NEXT'
+          : 'AUTO STOP';
+
+      autoNextButton.setAttribute(
+        'aria-pressed',
+        String(licenseContinueNext)
+      );
+    }
+
+    autoNextButton.disabled = false;
+
+    autoNextButton.setAttribute(
+      'aria-disabled',
+      'false'
+    );
+
+    autoNextButton.onclick = function () {
+      templateContinueButton.click();
+
+      window.setTimeout(
+        renderAutoNextButton,
+        0
+      );
+    };
+
+    renderAutoNextButton();
+  }
+
+  function bootLicenseAutoNextShortcut() {
+    window.setTimeout(
+      installLicenseAutoNextShortcut,
+      0
+    );
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      bootLicenseAutoNextShortcut,
+      { once: true }
+    );
+  } else {
+    bootLicenseAutoNextShortcut();
+  }
+})();
+
+/* ========================================================================
+   BLOCK 32120 END : LICENSE AUTO NEXT SHORTCUT
+   ======================================================================== */
+
+
+   
+
 // ============================================================================
 // 🟦 BLOCK 32200: LICENSE EXAM FLOATING TIMER
 // ============================================================================
@@ -8061,6 +8709,300 @@ document.addEventListener(
 
 
 
+/* ========================================================================
+   BLOCK 32400 START : LICENSE AI TUTOR CONNECTION
+   기존 Vercel Tutor API를 그대로 사용한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  function getLicenseTutorLanguage() {
+    var value = String(
+      document.getElementById(
+        'primaryLanguageSelect'
+      )?.value || 'EN'
+    )
+      .trim()
+      .toUpperCase();
+
+    return value === 'KO' || value === 'KOR'
+      ? 'KO'
+      : 'EN';
+  }
+
+  function getLicenseTutorContext() {
+    var question = licenseQuestions[
+      licenseQuestionIndex
+    ];
+
+    if (!question || !licenseCurrentCourse) {
+      return null;
+    }
+
+    return {
+      N: String(
+        licenseBatchOffset +
+        licenseQuestionIndex +
+        1
+      ),
+
+      SUBJECT:
+        licenseCurrentCourse.title ||
+        licenseCurrentCourse.productCode ||
+        'License',
+
+      QUESTION_ID: question.questionId || '',
+
+      Q_EN:
+        question.english?.question_text || '',
+
+      Q_KO:
+        question.korean?.question_text || '',
+
+      P_EN:
+        question.english?.passage || '',
+
+      P_KO:
+        question.korean?.passage || '',
+
+      '1_EN':
+        question.english?.option_1 || '',
+
+      '1_KO':
+        question.korean?.option_1 || '',
+
+      '2_EN':
+        question.english?.option_2 || '',
+
+      '2_KO':
+        question.korean?.option_2 || '',
+
+      '3_EN':
+        question.english?.option_3 || '',
+
+      '3_KO':
+        question.korean?.option_3 || '',
+
+      '4_EN':
+        question.english?.option_4 || '',
+
+      '4_KO':
+        question.korean?.option_4 || '',
+
+      A: question.answer || '',
+
+      E_EN:
+        question.english?.explanation || '',
+
+      E_KO:
+        question.korean?.explanation || '',
+
+      currentMode: licenseMode,
+
+      currentLanguage:
+        getLicenseTutorLanguage()
+    };
+  }
+
+  function renderLicenseTutor() {
+    var panel = document.getElementById(
+      'licenseTutorPanel'
+    );
+
+    var subtitle = document.getElementById(
+      'licenseTutorSubtitle'
+    );
+
+    var context = getLicenseTutorContext();
+
+    if (!panel) {
+      return;
+    }
+
+    panel.hidden = !context;
+
+    if (context && subtitle) {
+      subtitle.textContent =
+        context.SUBJECT +
+        ' · Question ' +
+        context.N;
+    }
+  }
+
+  async function sendLicenseTutorMessage() {
+    var input = document.getElementById(
+      'licenseTutorQuestion'
+    );
+
+    var response = document.getElementById(
+      'licenseTutorResponse'
+    );
+
+    var button = document.getElementById(
+      'licenseTutorSend'
+    );
+
+    var context = getLicenseTutorContext();
+
+    var message = String(
+      input?.value || ''
+    ).trim();
+
+    if (!input || !response || !button) {
+      return;
+    }
+
+    if (!message) {
+      response.textContent =
+        '⚠️ Please enter a question.';
+      return;
+    }
+
+    if (!context) {
+      response.textContent =
+        '⚠️ Start a License question first.';
+      return;
+    }
+
+    response.textContent = '⏳ Processing...';
+
+    input.disabled = true;
+    button.disabled = true;
+
+    try {
+      var apiResponse = await fetch(
+        window.LICENSE_CONFIG.tutor.apiUrl,
+        {
+          method: 'POST',
+
+          headers: {
+            'Content-Type': 'application/json'
+          },
+
+          body: JSON.stringify({
+            problemNumber: context.N,
+
+            question:
+              'Answer only in the same language ' +
+              'used in the learner question below.\n\n' +
+              message,
+
+            learnerQuestion: message,
+
+            responseLanguage: 'same-as-question',
+
+            responseInstruction:
+              'Answer only in the same language ' +
+              'used by the learner.',
+
+            context: context,
+
+            schemaVersion: 'SAT_MULTILANG_V2'
+          })
+        }
+      );
+
+      var result = await apiResponse.json();
+
+      if (!apiResponse.ok) {
+        throw new Error(
+          result.error ||
+          result.message ||
+          'AI Tutor request failed.'
+        );
+      }
+
+      response.textContent =
+        '🤖 ' +
+        (
+          result.message ||
+          result.response ||
+          'No response.'
+        );
+    } catch (error) {
+      console.error(
+        '[LICENSE] AI Tutor failed:',
+        error
+      );
+
+      response.textContent =
+        '❌ AI Tutor is temporarily unavailable.';
+    } finally {
+      input.disabled = false;
+      button.disabled = false;
+      input.value = '';
+      input.focus();
+    }
+  }
+
+  function installLicenseTutor() {
+    var input = document.getElementById(
+      'licenseTutorQuestion'
+    );
+
+    var button = document.getElementById(
+      'licenseTutorSend'
+    );
+
+    if (!input || !button) {
+      return;
+    }
+
+    button.addEventListener(
+      'click',
+      sendLicenseTutorMessage
+    );
+
+    input.addEventListener(
+      'keydown',
+      function (event) {
+        if (
+          event.key === 'Enter' &&
+          !event.isComposing
+        ) {
+          event.preventDefault();
+          sendLicenseTutorMessage();
+        }
+      }
+    );
+
+    var originalRenderLicenseQuestion =
+      renderLicenseQuestion;
+
+    renderLicenseQuestion = function () {
+      originalRenderLicenseQuestion.apply(
+        this,
+        arguments
+      );
+
+      renderLicenseTutor();
+    };
+
+    renderLicenseTutor();
+  }
+
+  window.getCurrentQuestionContext =
+    getLicenseTutorContext;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      installLicenseTutor,
+      { once: true }
+    );
+  } else {
+    installLicenseTutor();
+  }
+})();
+
+/* ========================================================================
+   BLOCK 32400 END : LICENSE AI TUTOR CONNECTION
+   ======================================================================== */
+
+
+
+
 
   
 /* ========================================================================
@@ -8087,3 +9029,8 @@ if (document.readyState === 'loading') {
 /* ========================================================================
    BLOCK 41000 END : LICENSE BOOTSTRAP AND MODULE CLOSURE
    ======================================================================== */
+
+
+
+
+
