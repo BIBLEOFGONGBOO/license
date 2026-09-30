@@ -5174,20 +5174,17 @@ let licenseExplainVisible = true;
 
 let licenseBatchOffset = 0;
 
+/* 범용 License 템플릿의 이어하기 저장값. */
 const LICENSE_RESUME_STORAGE_KEY =
-  'gongboo-license-resume-v1';
+  'gongboo-license-resume-v2';
 
 const LICENSE_BATCH_SIZES = Object.freeze({
-  realestate: 150,
-  insurance: 150,
-  mortgage: 150,
-  notary: 45
+  default: 300
 });
 
 /* ========================================================================
    BLOCK 21100 END : LICENSE STUDY STATE
    ======================================================================== */
-
 
 
 
@@ -5692,52 +5689,59 @@ function bootLicenseExtension() {
 
 
 
-  /* ========================================================================
-     BLOCK 21800 : LICENSE CATALOG API
-     새 EasyLearning의 license-content Function에서 과목 목록을 읽는다.
-     ======================================================================== */
+/* ========================================================================
+   BLOCK 21800 : CNA CATALOG API
+   ======================================================================== */
 
-  async function fetchLicenseCatalog() {
-    const config = window.LICENSE_CONFIG;
+async function fetchLicenseCatalog() {
+  const config = window.LICENSE_CONFIG;
 
-    if (!config) {
-      throw new Error(
-        'LICENSE_CONFIG is unavailable.'
-      );
-    }
-
-    const response = await fetch(
-      `${config.url}/functions/v1/${config.functionName}`,
-      {
-        method: 'POST',
-
-        headers: {
-          apikey: config.publishableKey,
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          action: 'catalog'
-        })
-      }
+  if (!config) {
+    throw new Error(
+      'LICENSE_CONFIG is unavailable.'
     );
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.error || 'Catalog request failed.'
-      );
-    }
-
-    if (!Array.isArray(result.products)) {
-      throw new Error(
-        'Catalog response has no products.'
-      );
-    }
-
-    return result.products;
   }
+
+  const response = await fetch(
+    `${config.url}/functions/v1/${config.functionName}`,
+    {
+      method: 'POST',
+
+      headers: {
+        apikey: config.publishableKey,
+
+        Authorization:
+          'Bearer ' + config.publishableKey,
+
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        action: 'catalog'
+      })
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || 'Catalog request failed.'
+    );
+  }
+
+  if (!Array.isArray(result.products)) {
+    throw new Error(
+      'Catalog response has no products.'
+    );
+  }
+
+  return result.products;
+}
+
+/* ========================================================================
+   BLOCK 21800 END : CNA CATALOG API
+   ======================================================================== */
 
 
 
@@ -7588,6 +7592,1375 @@ function installLicenseResults() {
 /* ========================================================================
    BLOCK 32000 END : ORIGINAL LICENSE RESULT FUNCTIONS
    ======================================================================== */
+
+
+
+
+/* ============================================================================
+   BLOCK 32010 START : CNA SET DIRECTORY AND 225 QUESTION WINDOW
+   초기 목록은 75문제 SET 목록이다.
+   선택한 SET부터 최대 3세트(225문제)를 저장하고 75문제씩 진행한다.
+   ========================================================================== */
+
+const CNA_SET_SIZE = 75;
+
+const CNA_WINDOW_SIZE = 225;
+
+let cnaQuestionPool = [];
+
+let cnaWindowStart = 0;
+
+let cnaSetIndex = 0;
+
+let cnaSetAnswers = [];
+
+
+function getCnaTotalSets(course) {
+  return Math.ceil(
+    Number(course.totalQuestionCount || 0) /
+    CNA_SET_SIZE
+  );
+}
+
+
+function getCnaSetLabel(course, setIndex) {
+  const start = setIndex * CNA_SET_SIZE + 1;
+
+  const end = Math.min(
+    (setIndex + 1) * CNA_SET_SIZE,
+    Number(course.totalQuestionCount || start)
+  );
+
+  return (
+    course.title +
+    ' · SET ' +
+    String(setIndex + 1) +
+    ' · ' +
+    String(start) +
+    '–' +
+    String(end)
+  );
+}
+
+
+function applyCnaQuestionSet(setIndex) {
+  const totalLoadedSets = Math.max(
+    1,
+    Math.ceil(
+      cnaQuestionPool.length / CNA_SET_SIZE
+    )
+  );
+
+  cnaSetIndex = Math.max(
+    0,
+    Math.min(
+      totalLoadedSets - 1,
+      Number(setIndex) || 0
+    )
+  );
+
+  const localStart = cnaSetIndex * CNA_SET_SIZE;
+
+  licenseQuestions = cnaQuestionPool.slice(
+    localStart,
+    localStart + CNA_SET_SIZE
+  );
+
+  licenseAnswers = Array.isArray(
+    cnaSetAnswers[cnaSetIndex]
+  )
+    ? cnaSetAnswers[cnaSetIndex].slice(
+        0,
+        licenseQuestions.length
+      )
+    : [];
+
+  while (
+    licenseAnswers.length <
+    licenseQuestions.length
+  ) {
+    licenseAnswers.push(null);
+  }
+
+  cnaSetAnswers[cnaSetIndex] =
+    licenseAnswers;
+
+  licenseQuestionIndex = 0;
+
+  licenseBatchOffset =
+    cnaWindowStart + localStart;
+
+  window.CONVERSATION_V2_ROLE_TARGET_TURN = 1;
+}
+
+
+saveLicenseResume = function () {
+  if (licenseQuestions.length) {
+    cnaSetAnswers[cnaSetIndex] =
+      licenseAnswers.slice();
+  }
+
+  const snapshot = {
+    version: 1,
+
+    savedAt: Date.now(),
+
+    settings: getLicenseSettingsSnapshot(),
+
+    lesson: licenseCurrentCourse &&
+      licenseQuestions.length
+      ? {
+          course: licenseCurrentCourse,
+
+          questions: licenseQuestions,
+
+          questionIndex: licenseQuestionIndex,
+
+          answers: licenseAnswers,
+
+          batchOffset: licenseBatchOffset,
+
+          cnaQuestionPool: cnaQuestionPool,
+
+          cnaWindowStart: cnaWindowStart,
+
+          cnaSetIndex: cnaSetIndex,
+
+          cnaSetAnswers: cnaSetAnswers
+        }
+      : null
+  };
+
+  try {
+    localStorage.setItem(
+      LICENSE_RESUME_STORAGE_KEY,
+      JSON.stringify(snapshot)
+    );
+  } catch (error) {
+    console.warn(
+      '[CNA] Resume save failed:',
+      error
+    );
+  }
+};
+
+
+resumeStoredLicenseLesson = function () {
+  const snapshot = getLicenseResumeSnapshot();
+
+  const lesson = snapshot?.lesson;
+
+  if (
+    !lesson ||
+    !lesson.course ||
+    !Array.isArray(lesson.cnaQuestionPool) ||
+    !lesson.cnaQuestionPool.length
+  ) {
+    return;
+  }
+
+  licenseCurrentCourse = lesson.course;
+
+  cnaQuestionPool = lesson.cnaQuestionPool;
+
+  cnaWindowStart = Math.max(
+    0,
+    Number(lesson.cnaWindowStart) || 0
+  );
+
+  cnaSetAnswers = Array.isArray(
+    lesson.cnaSetAnswers
+  )
+    ? lesson.cnaSetAnswers
+    : [];
+
+  applyCnaQuestionSet(
+    Number(lesson.cnaSetIndex) || 0
+  );
+
+  licenseQuestionIndex = Math.max(
+    0,
+    Math.min(
+      licenseQuestions.length - 1,
+      Number(lesson.questionIndex) || 0
+    )
+  );
+
+  enterLicenseQuestionScreen();
+
+  renderLicenseQuestion();
+
+  saveLicenseResume();
+};
+
+
+async function selectCnaSet(
+  course,
+  selectedSetIndex
+) {
+  const elements = getTemplateElements();
+
+  cnaWindowStart =
+    selectedSetIndex * CNA_SET_SIZE;
+
+  if (elements.status) {
+    elements.status.textContent =
+      'Loading ' +
+      getCnaSetLabel(
+        course,
+        selectedSetIndex
+      ) +
+      ' and next sets...';
+  }
+
+  try {
+    const result = await fetchLicenseQuestions(
+      course.productCode,
+      CNA_WINDOW_SIZE,
+      cnaWindowStart
+    );
+
+    licenseCurrentCourse = course;
+
+    cnaQuestionPool = normalizeLicenseQuestions(
+      result.data
+    ).slice(0, CNA_WINDOW_SIZE);
+
+    if (!cnaQuestionPool.length) {
+      throw new Error(
+        'No questions are available for this set.'
+      );
+    }
+
+    cnaSetIndex = 0;
+
+    cnaSetAnswers = [];
+
+    applyCnaQuestionSet(0);
+
+    enterLicenseQuestionScreen();
+
+    renderLicenseQuestion();
+
+    saveLicenseResume();
+
+    if (elements.status) {
+      elements.status.textContent =
+        getCnaSetLabel(
+          course,
+          selectedSetIndex
+        ) +
+        ' loaded';
+    }
+  } catch (error) {
+    if (elements.status) {
+      elements.status.textContent =
+        'Question load failed';
+    }
+
+    console.error(
+      '[CNA] Set load failed:',
+      error
+    );
+  }
+}
+
+
+renderLicenseDirectory = async function () {
+  const elements = getTemplateElements();
+
+  if (
+    !elements.app ||
+    !elements.directory ||
+    !elements.breadcrumb ||
+    !elements.list
+  ) {
+    return;
+  }
+
+  elements.directory.hidden = false;
+
+  elements.app.classList.add(
+    'conversation-directory-open'
+  );
+
+  if (elements.lesson) {
+    elements.lesson.hidden = true;
+  }
+
+  const licenseLesson = document.getElementById(
+    'licenseLesson'
+  );
+
+  if (licenseLesson) {
+    licenseLesson.hidden = true;
+  }
+
+  elements.breadcrumb.innerHTML = '';
+
+  elements.list.innerHTML = '';
+
+  const home = document.createElement('button');
+
+  home.type = 'button';
+
+  home.className =
+    'conversation-directory-breadcrumb-item';
+
+  home.textContent = 'CNA';
+
+  home.onclick = renderLicenseDirectory;
+
+  elements.breadcrumb.appendChild(home);
+
+  try {
+    const products = await fetchLicenseCatalog();
+
+    licenseCourses = normalizeLicenseCourses(
+      products
+    );
+
+    const snapshot = getLicenseResumeSnapshot();
+
+    const lesson = snapshot?.lesson;
+
+    if (
+      lesson?.course &&
+      Array.isArray(lesson.cnaQuestionPool) &&
+      lesson.cnaQuestionPool.length
+    ) {
+      const resume = document.createElement(
+        'button'
+      );
+
+      resume.type = 'button';
+
+      resume.className =
+        'conversation-directory-item is-directory-title';
+
+      resume.textContent =
+        'RESUME · ' +
+        lesson.course.title +
+        ' · SET ' +
+        String(
+          Math.floor(
+            (Number(lesson.cnaWindowStart) || 0) /
+            CNA_SET_SIZE
+          ) +
+          (Number(lesson.cnaSetIndex) || 0) +
+          1
+        );
+
+      resume.onclick = resumeStoredLicenseLesson;
+
+      elements.list.appendChild(resume);
+    }
+
+    licenseCourses.forEach(function (course) {
+      const totalSets = getCnaTotalSets(course);
+
+      for (
+        let setIndex = 0;
+        setIndex < totalSets;
+        setIndex += 1
+      ) {
+        const item = document.createElement(
+          'button'
+        );
+
+        item.type = 'button';
+
+        item.className =
+          'conversation-directory-item is-directory-title';
+
+        item.textContent = getCnaSetLabel(
+          course,
+          setIndex
+        );
+
+        item.onclick = function () {
+          selectCnaSet(course, setIndex);
+        };
+
+        elements.list.appendChild(item);
+      }
+    });
+
+    if (elements.status) {
+      elements.status.textContent =
+        'CNA sets loaded';
+    }
+  } catch (error) {
+    elements.list.innerHTML = '';
+
+    const failure = document.createElement('div');
+
+    failure.className =
+      'conversation-directory-empty';
+
+    failure.textContent =
+      'CNA sets could not be loaded.';
+
+    elements.list.appendChild(failure);
+
+    console.error(
+      '[CNA] Set directory failed:',
+      error
+    );
+  }
+};
+
+
+const originalShowLicenseResults =
+  showLicenseResults;
+
+showLicenseResults = function () {
+  originalShowLicenseResults();
+
+  const resultModal = document.getElementById(
+    'resultModal'
+  );
+
+  const buttonGroup = resultModal?.querySelector(
+    '.button-group'
+  );
+
+  document.getElementById(
+    'cnaNextSetButton'
+  )?.remove();
+
+  const loadedSetCount = Math.ceil(
+    cnaQuestionPool.length / CNA_SET_SIZE
+  );
+
+  if (
+    !buttonGroup ||
+    cnaSetIndex >= loadedSetCount - 1
+  ) {
+    return;
+  }
+
+  const nextSetButton = document.createElement(
+    'button'
+  );
+
+  nextSetButton.id = 'cnaNextSetButton';
+
+  nextSetButton.type = 'button';
+
+  nextSetButton.className =
+    'nav-btn btn-next';
+
+  nextSetButton.textContent =
+    'NEXT SET · ' +
+    String(
+      Math.floor(
+        cnaWindowStart / CNA_SET_SIZE
+      ) +
+      cnaSetIndex +
+      2
+    );
+
+  nextSetButton.onclick = function () {
+    cnaSetAnswers[cnaSetIndex] =
+      licenseAnswers.slice();
+
+    applyCnaQuestionSet(cnaSetIndex + 1);
+
+    resultModal.style.display = 'none';
+
+    saveLicenseResume();
+
+    renderLicenseQuestion();
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
+  buttonGroup.appendChild(nextSetButton);
+};
+
+/* ============================================================================
+   BLOCK 32010 END : CNA SET DIRECTORY AND 225 QUESTION WINDOW
+   ========================================================================== */
+
+
+/* ============================================================================
+   BLOCK 32020 START : GENERIC LICENSE COURSE SETS
+   A course added to public.questions uses DEFAULT automatically.
+   ========================================================================== */
+
+let licenseCourseQuestionPool = [];
+
+let licenseCourseWindowStart = 0;
+
+let licenseCourseSetIndex = 0;
+
+let licenseCourseSetAnswers = [];
+
+
+function getLicenseCourseKey(course) {
+  return String(
+    course?.productCode ||
+    course?.product_code ||
+    course || ''
+  )
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '');
+}
+
+
+function getLicenseCourseSettings(course) {
+  const settings =
+    window.LICENSE_CONFIG?.courseSettings || {};
+
+  const defaults = settings.DEFAULT || {};
+
+  const override = settings[
+    getLicenseCourseKey(course)
+  ] || {};
+
+  return {
+    active: override.active !== false &&
+      defaults.active !== false,
+
+    title: String(
+      override.title ||
+      course?.title ||
+      getLicenseCourseKey(course)
+    ),
+
+    displayOrder: Number(
+      override.displayOrder ?? defaults.displayOrder
+    ) || 999,
+
+    setSize: Math.max(
+      1,
+      Number(override.setSize || defaults.setSize) || 100
+    ),
+
+    preloadSets: Math.max(
+      1,
+      Number(
+        override.preloadSets || defaults.preloadSets
+      ) || 3
+    )
+  };
+}
+
+
+function getLicenseTotalSets(course) {
+  const settings = getLicenseCourseSettings(course);
+
+  return Math.ceil(
+    Number(course.totalQuestionCount || 0) /
+    settings.setSize
+  );
+}
+
+
+function getLicenseSetLabel(course, setIndex) {
+  const settings = getLicenseCourseSettings(course);
+
+  const start = setIndex * settings.setSize + 1;
+
+  const end = Math.min(
+    (setIndex + 1) * settings.setSize,
+    Number(course.totalQuestionCount || start)
+  );
+
+  return (
+    settings.title +
+    ' · SET ' +
+    String(setIndex + 1) +
+    ' · ' +
+    String(start) +
+    '–' +
+    String(end)
+  );
+}
+
+
+function applyLicenseCourseSet(setIndex) {
+  const settings = getLicenseCourseSettings(
+    licenseCurrentCourse
+  );
+
+  const totalLoadedSets = Math.max(
+    1,
+    Math.ceil(
+      licenseCourseQuestionPool.length /
+      settings.setSize
+    )
+  );
+
+  licenseCourseSetIndex = Math.max(
+    0,
+    Math.min(totalLoadedSets - 1, Number(setIndex) || 0)
+  );
+
+  const localStart =
+    licenseCourseSetIndex * settings.setSize;
+
+  licenseQuestions = licenseCourseQuestionPool.slice(
+    localStart,
+    localStart + settings.setSize
+  );
+
+  licenseAnswers = Array.isArray(
+    licenseCourseSetAnswers[licenseCourseSetIndex]
+  )
+    ? licenseCourseSetAnswers[
+        licenseCourseSetIndex
+      ].slice(0, licenseQuestions.length)
+    : [];
+
+  while (licenseAnswers.length < licenseQuestions.length) {
+    licenseAnswers.push(null);
+  }
+
+  licenseCourseSetAnswers[licenseCourseSetIndex] =
+    licenseAnswers;
+
+  licenseQuestionIndex = 0;
+
+  licenseBatchOffset =
+    licenseCourseWindowStart + localStart;
+
+  window.CONVERSATION_V2_ROLE_TARGET_TURN = 1;
+}
+
+
+saveLicenseResume = function () {
+  if (licenseQuestions.length) {
+    licenseCourseSetAnswers[licenseCourseSetIndex] =
+      licenseAnswers.slice();
+  }
+
+  const snapshot = {
+    version: 1,
+    savedAt: Date.now(),
+    settings: getLicenseSettingsSnapshot(),
+    lesson: licenseCurrentCourse && licenseQuestions.length
+      ? {
+          course: licenseCurrentCourse,
+          questionIndex: licenseQuestionIndex,
+          answers: licenseAnswers,
+          batchOffset: licenseBatchOffset,
+          questionPool: licenseCourseQuestionPool,
+          windowStart: licenseCourseWindowStart,
+          setIndex: licenseCourseSetIndex,
+          setAnswers: licenseCourseSetAnswers
+        }
+      : null
+  };
+
+  try {
+    localStorage.setItem(
+      LICENSE_RESUME_STORAGE_KEY,
+      JSON.stringify(snapshot)
+    );
+  } catch (error) {
+    console.warn('[LICENSE] Resume save failed:', error);
+  }
+};
+
+
+resumeStoredLicenseLesson = function () {
+  const lesson = getLicenseResumeSnapshot()?.lesson;
+
+  if (
+    !lesson?.course ||
+    !Array.isArray(lesson.questionPool) ||
+    !lesson.questionPool.length
+  ) {
+    return;
+  }
+
+  const settings = getLicenseCourseSettings(lesson.course);
+
+  licenseCurrentCourse = Object.assign({}, lesson.course, {
+    title: settings.title
+  });
+
+  licenseCourseQuestionPool = lesson.questionPool;
+
+  licenseCourseWindowStart = Math.max(
+    0,
+    Number(lesson.windowStart) || 0
+  );
+
+  licenseCourseSetAnswers = Array.isArray(lesson.setAnswers)
+    ? lesson.setAnswers
+    : [];
+
+  applyLicenseCourseSet(Number(lesson.setIndex) || 0);
+
+  licenseQuestionIndex = Math.max(
+    0,
+    Math.min(
+      licenseQuestions.length - 1,
+      Number(lesson.questionIndex) || 0
+    )
+  );
+
+  enterLicenseQuestionScreen();
+  renderLicenseQuestion();
+  saveLicenseResume();
+};
+
+
+async function selectLicenseCourseSet(course, setIndex) {
+  const elements = getTemplateElements();
+
+  const settings = getLicenseCourseSettings(course);
+
+  licenseCourseWindowStart = setIndex * settings.setSize;
+
+  if (elements.status) {
+    elements.status.textContent =
+      'Loading ' + getLicenseSetLabel(course, setIndex);
+  }
+
+  try {
+    const result = await fetchLicenseQuestions(
+      course.productCode,
+      settings.setSize * settings.preloadSets,
+      licenseCourseWindowStart
+    );
+
+    licenseCurrentCourse = Object.assign({}, course, {
+      title: settings.title
+    });
+
+    licenseCourseQuestionPool = normalizeLicenseQuestions(
+      result.data
+    ).slice(0, settings.setSize * settings.preloadSets);
+
+    if (!licenseCourseQuestionPool.length) {
+      throw new Error('No questions are available for this set.');
+    }
+
+    licenseCourseSetIndex = 0;
+    licenseCourseSetAnswers = [];
+
+    applyLicenseCourseSet(0);
+    enterLicenseQuestionScreen();
+    renderLicenseQuestion();
+    saveLicenseResume();
+
+    if (elements.status) {
+      elements.status.textContent =
+        getLicenseSetLabel(course, setIndex) + ' loaded';
+    }
+  } catch (error) {
+    if (elements.status) {
+      elements.status.textContent = 'Question load failed';
+    }
+
+    console.error('[LICENSE] Set load failed:', error);
+  }
+}
+
+
+renderLicenseDirectory = async function () {
+  const elements = getTemplateElements();
+
+  if (
+    !elements.app ||
+    !elements.directory ||
+    !elements.breadcrumb ||
+    !elements.list
+  ) {
+    return;
+  }
+
+  elements.directory.hidden = false;
+  elements.app.classList.add('conversation-directory-open');
+
+  if (elements.lesson) {
+    elements.lesson.hidden = true;
+  }
+
+  const licenseLesson = document.getElementById('licenseLesson');
+
+  if (licenseLesson) {
+    licenseLesson.hidden = true;
+  }
+
+  elements.breadcrumb.innerHTML = '';
+  elements.list.innerHTML = '';
+
+  const home = document.createElement('button');
+  home.type = 'button';
+  home.className = 'conversation-directory-breadcrumb-item';
+  home.textContent = 'LICENSE';
+  home.onclick = renderLicenseDirectory;
+  elements.breadcrumb.appendChild(home);
+
+  try {
+    licenseCourses = normalizeLicenseCourses(
+      await fetchLicenseCatalog()
+    )
+            .filter(function (course) {
+        const hiddenCourses =
+          window.LICENSE_CONFIG?.hiddenCourses || [];
+
+        return (
+          getLicenseCourseSettings(course).active &&
+          !hiddenCourses.includes(
+            getLicenseCourseKey(course)
+          )
+        );
+      })
+      .sort(function (left, right) {
+        const leftSettings = getLicenseCourseSettings(left);
+        const rightSettings = getLicenseCourseSettings(right);
+
+        return leftSettings.displayOrder -
+          rightSettings.displayOrder ||
+          leftSettings.title.localeCompare(rightSettings.title);
+      });
+
+    const lesson = getLicenseResumeSnapshot()?.lesson;
+
+    if (
+      lesson?.course &&
+      Array.isArray(lesson.questionPool) &&
+      lesson.questionPool.length
+    ) {
+      const resume = document.createElement('button');
+      const resumeSettings = getLicenseCourseSettings(lesson.course);
+
+      resume.type = 'button';
+      resume.className =
+        'conversation-directory-item is-directory-title';
+      resume.textContent =
+        'RESUME · ' +
+        resumeSettings.title +
+        ' · SET ' +
+        String(
+          Math.floor(
+            (Number(lesson.windowStart) || 0) /
+            resumeSettings.setSize
+          ) +
+          (Number(lesson.setIndex) || 0) +
+          1
+        );
+      resume.onclick = resumeStoredLicenseLesson;
+      elements.list.appendChild(resume);
+    }
+
+    licenseCourses.forEach(function (course) {
+      const totalSets = getLicenseTotalSets(course);
+
+      for (let setIndex = 0; setIndex < totalSets; setIndex += 1) {
+        const item = document.createElement('button');
+
+        item.type = 'button';
+        item.className =
+          'conversation-directory-item is-directory-title';
+        item.textContent = getLicenseSetLabel(course, setIndex);
+        item.onclick = function () {
+          selectLicenseCourseSet(course, setIndex);
+        };
+        elements.list.appendChild(item);
+      }
+    });
+
+    if (elements.status) {
+      elements.status.textContent = 'License sets loaded';
+    }
+  } catch (error) {
+    elements.list.innerHTML = '';
+
+    const failure = document.createElement('div');
+    failure.className = 'conversation-directory-empty';
+    failure.textContent = 'License courses could not be loaded.';
+    elements.list.appendChild(failure);
+
+    console.error('[LICENSE] Set directory failed:', error);
+  }
+};
+
+
+showLicenseResults = function () {
+  originalShowLicenseResults();
+
+  const resultModal = document.getElementById('resultModal');
+  const buttonGroup = resultModal?.querySelector('.button-group');
+  const settings = getLicenseCourseSettings(licenseCurrentCourse);
+
+  document.getElementById('licenseNextSetButton')?.remove();
+
+  const loadedSetCount = Math.ceil(
+    licenseCourseQuestionPool.length / settings.setSize
+  );
+
+  if (!buttonGroup || licenseCourseSetIndex >= loadedSetCount - 1) {
+    return;
+  }
+
+  const nextSetButton = document.createElement('button');
+  nextSetButton.id = 'licenseNextSetButton';
+  nextSetButton.type = 'button';
+  nextSetButton.className = 'nav-btn btn-next';
+  nextSetButton.textContent =
+    'NEXT SET · ' +
+    String(
+      Math.floor(
+        licenseCourseWindowStart / settings.setSize
+      ) + licenseCourseSetIndex + 2
+    );
+
+  nextSetButton.onclick = function () {
+    licenseCourseSetAnswers[licenseCourseSetIndex] =
+      licenseAnswers.slice();
+
+    applyLicenseCourseSet(licenseCourseSetIndex + 1);
+    resultModal.style.display = 'none';
+    saveLicenseResume();
+    renderLicenseQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  buttonGroup.appendChild(nextSetButton);
+};
+
+/* ============================================================================
+   BLOCK 32020 END : GENERIC LICENSE COURSE SETS
+   ========================================================================== */
+
+
+
+
+/* ============================================================================
+   BLOCK 32030 START : LICENSE COURSE FIRST DIRECTORY
+   첫 화면은 과목만 표시하고, 과목 선택 후 SET 목록을 연다.
+   ========================================================================== */
+
+let licenseDirectoryRenderToken = 0;
+
+let licenseCatalogCache = null;
+
+let licenseCatalogPromise = null;
+
+
+function getLicenseCatalogOnce() {
+  if (Array.isArray(licenseCatalogCache)) {
+    return Promise.resolve(licenseCatalogCache);
+  }
+
+  if (licenseCatalogPromise) {
+    return licenseCatalogPromise;
+  }
+
+  licenseCatalogPromise = fetchLicenseCatalog()
+    .then(function (products) {
+      licenseCatalogCache = products;
+
+      return products;
+    })
+    .finally(function () {
+      licenseCatalogPromise = null;
+    });
+
+  return licenseCatalogPromise;
+}
+
+
+function renderLicenseCourseSetDirectory(course) {
+  const elements = getTemplateElements();
+
+  if (
+    !elements.directory ||
+    !elements.breadcrumb ||
+    !elements.list
+  ) {
+    return;
+  }
+
+  licenseDirectoryRenderToken += 1;
+
+  const settings = getLicenseCourseSettings(course);
+
+  elements.directory.hidden = false;
+
+  elements.breadcrumb.innerHTML = '';
+  elements.list.innerHTML = '';
+
+  const home = document.createElement('button');
+
+  home.type = 'button';
+
+  home.className =
+    'conversation-directory-breadcrumb-item';
+
+  home.textContent = 'LICENSE';
+
+  home.onclick = renderLicenseDirectory;
+
+  elements.breadcrumb.appendChild(home);
+
+  const separator = document.createElement('span');
+
+  separator.className =
+    'conversation-directory-breadcrumb-separator';
+
+  separator.textContent = '›';
+
+  elements.breadcrumb.appendChild(separator);
+
+  const currentCourse = document.createElement('button');
+
+  currentCourse.type = 'button';
+
+  currentCourse.className =
+    'conversation-directory-breadcrumb-item';
+
+  currentCourse.textContent = settings.title;
+
+  currentCourse.onclick = function () {
+    renderLicenseCourseSetDirectory(course);
+  };
+
+  elements.breadcrumb.appendChild(currentCourse);
+
+  const totalSets = getLicenseTotalSets(course);
+
+  for (
+    let setIndex = 0;
+    setIndex < totalSets;
+    setIndex += 1
+  ) {
+    const item = document.createElement('button');
+
+    item.type = 'button';
+
+    item.className =
+      'conversation-directory-item is-directory-title';
+
+    item.textContent = getLicenseSetLabel(
+      course,
+      setIndex
+    );
+
+    item.onclick = function () {
+      selectLicenseCourseSet(course, setIndex);
+    };
+
+    elements.list.appendChild(item);
+  }
+
+  if (elements.status) {
+    elements.status.textContent =
+      settings.title + ' · Select a set';
+  }
+}
+
+
+renderLicenseDirectory = async function () {
+  const renderToken =
+    ++licenseDirectoryRenderToken;
+
+  const elements = getTemplateElements();
+
+  if (
+    !elements.app ||
+    !elements.directory ||
+    !elements.breadcrumb ||
+    !elements.list
+  ) {
+    return;
+  }
+
+  elements.directory.hidden = false;
+
+  elements.app.classList.add(
+    'conversation-directory-open'
+  );
+
+  if (elements.lesson) {
+    elements.lesson.hidden = true;
+  }
+
+  const licenseLesson = document.getElementById(
+    'licenseLesson'
+  );
+
+  if (licenseLesson) {
+    licenseLesson.hidden = true;
+  }
+
+  elements.breadcrumb.innerHTML = '';
+  elements.list.innerHTML = '';
+
+  const home = document.createElement('button');
+
+  home.type = 'button';
+
+  home.className =
+    'conversation-directory-breadcrumb-item';
+
+  home.textContent = 'LICENSE';
+
+  home.onclick = renderLicenseDirectory;
+
+  elements.breadcrumb.appendChild(home);
+
+  try {
+    const products =
+      await getLicenseCatalogOnce();
+
+    if (
+      renderToken !==
+      licenseDirectoryRenderToken
+    ) {
+      return;
+    }
+
+    const hiddenCourses =
+      window.LICENSE_CONFIG?.hiddenCourses || [];
+
+    licenseCourses = normalizeLicenseCourses(
+      products
+    )
+      .filter(function (course) {
+        return (
+          getLicenseCourseSettings(course).active &&
+          !hiddenCourses.includes(
+            getLicenseCourseKey(course)
+          )
+        );
+      })
+      .sort(function (left, right) {
+        const leftSettings =
+          getLicenseCourseSettings(left);
+
+        const rightSettings =
+          getLicenseCourseSettings(right);
+
+        return (
+          leftSettings.displayOrder -
+            rightSettings.displayOrder ||
+          leftSettings.title.localeCompare(
+            rightSettings.title
+          )
+        );
+      });
+
+    licenseCourses.forEach(function (course) {
+      const settings = getLicenseCourseSettings(
+        course
+      );
+
+      const item = document.createElement('button');
+
+      item.type = 'button';
+
+      item.className =
+        'conversation-directory-item is-directory-title';
+
+      item.textContent = settings.title;
+
+      item.onclick = function () {
+        renderLicenseCourseSetDirectory(course);
+      };
+
+      elements.list.appendChild(item);
+    });
+
+    if (elements.status) {
+      elements.status.textContent =
+        'Select a course';
+    }
+  } catch (error) {
+    if (
+      renderToken !==
+      licenseDirectoryRenderToken
+    ) {
+      return;
+    }
+
+    elements.list.innerHTML = '';
+
+    const failure = document.createElement('div');
+
+    failure.className =
+      'conversation-directory-empty';
+
+    failure.textContent =
+      'License courses could not be loaded.';
+
+    elements.list.appendChild(failure);
+
+    console.error(
+      '[LICENSE] Course directory failed:',
+      error
+    );
+  }
+};
+
+/* ============================================================================
+   BLOCK 32030 END : LICENSE COURSE FIRST DIRECTORY
+   ========================================================================== */
+
+   
+
+
+/* ============================================================================
+   BLOCK 32040 START : ONE SET LOAD AND NEXT SET REQUEST
+   처음에는 현재 SET 하나만 받고, NEXT SET에서 다음 SET을 요청한다.
+   ========================================================================== */
+
+async function loadNextLicenseCourseSet(
+  nextSetIndex,
+  button
+) {
+  const course = licenseCurrentCourse;
+
+  const settings = getLicenseCourseSettings(course);
+
+  const totalSets = getLicenseTotalSets(course);
+
+  if (
+    !course ||
+    nextSetIndex < 0 ||
+    nextSetIndex >= totalSets
+  ) {
+    return;
+  }
+
+  if (button) {
+    button.disabled = true;
+
+    button.textContent =
+      'LOADING NEXT SET...';
+  }
+
+  try {
+    const result = await fetchLicenseQuestions(
+      course.productCode,
+      settings.setSize,
+      nextSetIndex * settings.setSize
+    );
+
+    const nextQuestions = normalizeLicenseQuestions(
+      result.data
+    ).slice(0, settings.setSize);
+
+    if (!nextQuestions.length) {
+      throw new Error(
+        'No questions are available for this set.'
+      );
+    }
+
+    licenseCourseQuestionPool = nextQuestions;
+
+    licenseCourseWindowStart =
+      nextSetIndex * settings.setSize;
+
+    licenseCourseSetIndex = 0;
+
+    licenseCourseSetAnswers = [];
+
+    applyLicenseCourseSet(0);
+
+    document.getElementById(
+      'resultModal'
+    ).style.display = 'none';
+
+    saveLicenseResume();
+
+    renderLicenseQuestion();
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  } catch (error) {
+    console.error(
+      '[LICENSE] Next set load failed:',
+      error
+    );
+
+    if (button) {
+      button.disabled = false;
+
+      button.textContent = 'NEXT SET';
+    }
+  }
+}
+
+
+showLicenseResults = function () {
+  originalShowLicenseResults();
+
+  const resultModal = document.getElementById(
+    'resultModal'
+  );
+
+  const buttonGroup = resultModal?.querySelector(
+    '.button-group'
+  );
+
+  const course = licenseCurrentCourse;
+
+  if (!buttonGroup || !course) {
+    return;
+  }
+
+  document.getElementById(
+    'licenseNextSetButton'
+  )?.remove();
+
+  const settings = getLicenseCourseSettings(course);
+
+  const currentSetIndex =
+    Math.floor(
+      licenseCourseWindowStart / settings.setSize
+    );
+
+  const nextSetIndex = currentSetIndex + 1;
+
+  const totalSets = getLicenseTotalSets(course);
+
+  if (nextSetIndex >= totalSets) {
+    return;
+  }
+
+  const nextSetButton = document.createElement(
+    'button'
+  );
+
+  nextSetButton.id = 'licenseNextSetButton';
+
+  nextSetButton.type = 'button';
+
+  nextSetButton.className =
+    'nav-btn btn-next';
+
+  nextSetButton.textContent =
+    'NEXT SET · ' +
+    String(nextSetIndex + 1);
+
+  nextSetButton.onclick = function () {
+    loadNextLicenseCourseSet(
+      nextSetIndex,
+      nextSetButton
+    );
+  };
+
+  buttonGroup.appendChild(nextSetButton);
+};
+
+/* ============================================================================
+   BLOCK 32040 END : ONE SET LOAD AND NEXT SET REQUEST
+   ========================================================================== */
+
+
 
 
 
@@ -9462,12 +10835,13 @@ document.addEventListener(
       return;
     }
 
-    if (
-      /not registered|사전 항목이 없습니다|not found/i
-        .test(status)
+       if (
+      /searching|azure translating/i.test(status)
     ) {
-      requestAzureTranslation();
+      return;
     }
+
+    requestAzureTranslation();
   }
 
   function installAzureDictionaryFallback() {
@@ -9553,6 +10927,227 @@ document.addEventListener(
    ======================================================================== */
 
    
+
+
+/* ============================================================================
+   BLOCK 32450 START : SIMPLE TWO-LINE DICTIONARY POPUP
+   단어와 번역만 표시한다.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var updating = false;
+
+  function simplifyDictionaryPopup() {
+    if (updating) {
+      return;
+    }
+
+    var popup = document.getElementById(
+      'licenseDictionaryPopup'
+    );
+
+    if (!popup) {
+      return;
+    }
+
+    var base = popup.querySelector(
+      '.license-dictionary-base'
+    );
+
+    var definition = popup.querySelector(
+      '.license-dictionary-definition'
+    );
+
+    var status = popup.querySelector(
+      '.license-dictionary-status'
+    );
+
+    var translation = popup.querySelector(
+      '.license-dictionary-korean'
+    );
+
+    if (base) {
+      base.textContent = '';
+      base.style.display = 'none';
+    }
+
+    if (definition) {
+      definition.textContent = '';
+      definition.style.display = 'none';
+    }
+
+    if (status) {
+      status.textContent = '';
+      status.style.display = 'none';
+    }
+
+    if (translation) {
+      var simpleTranslation = String(
+        translation.textContent || ''
+      ).replace(
+        /^[^:]{1,40}:\s*/,
+        ''
+      ).trim();
+
+      if (
+        translation.textContent !==
+        simpleTranslation
+      ) {
+        updating = true;
+
+        translation.textContent =
+          simpleTranslation;
+
+        updating = false;
+      }
+    }
+  }
+
+  new MutationObserver(function () {
+    window.setTimeout(
+      simplifyDictionaryPopup,
+      0
+    );
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  simplifyDictionaryPopup();
+})();
+
+/* ============================================================================
+   BLOCK 32450 END : SIMPLE TWO-LINE DICTIONARY POPUP
+   ========================================================================== */
+
+
+
+
+/* ============================================================================
+   BLOCK 32460 START : INLINE DICTIONARY AND OUTSIDE CLOSE
+   단어와 해석을 한 줄로 표시하고, 바깥 화면 클릭 시 닫는다.
+   ========================================================================== */
+
+(function () {
+  'use strict';
+
+  var updating = false;
+
+  function makeDictionaryInline() {
+    if (updating) {
+      return;
+    }
+
+    var popup = document.getElementById(
+      'licenseDictionaryPopup'
+    );
+
+    if (!popup) {
+      return;
+    }
+
+    var title = popup.querySelector(
+      '.license-dictionary-word-title'
+    );
+
+    var translation = popup.querySelector(
+      '.license-dictionary-korean'
+    );
+
+    if (!title || !translation) {
+      return;
+    }
+
+    var rawWord = String(
+      title.textContent || ''
+    ).trim();
+
+    var simpleWord = rawWord
+      .replace(/\s*:\s*.*$/, '')
+      .trim();
+
+    var simpleTranslation = String(
+      translation.textContent || ''
+    )
+      .replace(/^[^:]{1,40}:\s*/, '')
+      .trim();
+
+    if (!simpleWord || !simpleTranslation) {
+      return;
+    }
+
+    var inlineText =
+      simpleWord + ': ' + simpleTranslation;
+
+    if (title.textContent !== inlineText) {
+      updating = true;
+
+      title.textContent = inlineText;
+
+      updating = false;
+    }
+
+    translation.style.display = 'none';
+  }
+
+
+  document.addEventListener(
+    'click',
+    function (event) {
+      var popup = document.getElementById(
+        'licenseDictionaryPopup'
+      );
+
+      if (!popup || popup.hidden) {
+        return;
+      }
+
+      if (
+        event.target.closest('#licenseDictionaryPopup') ||
+        event.target.closest(
+          '.license-dictionary-word, ' +
+          '.conversation-tts-word'
+        )
+      ) {
+        return;
+      }
+
+      popup.hidden = true;
+
+      document.querySelectorAll(
+        '.license-dictionary-word.is-dictionary-open, ' +
+        '.conversation-tts-word.is-dictionary-open'
+      ).forEach(function (word) {
+        word.classList.remove(
+          'is-dictionary-open'
+        );
+      });
+    },
+    true
+  );
+
+
+  new MutationObserver(function () {
+    window.setTimeout(
+      makeDictionaryInline,
+      0
+    );
+  }).observe(document.body, {
+    childList: true,
+    subtree: true,
+    characterData: true
+  });
+
+  makeDictionaryInline();
+})();
+
+/* ============================================================================
+   BLOCK 32460 END : INLINE DICTIONARY AND OUTSIDE CLOSE
+   ========================================================================== */
+
 
 
   
