@@ -6628,6 +6628,7 @@ function selectLicenseAnswer(answer) {
 
 /* ========================================================================
    BLOCK 31400 START : LICENSE QUESTION NAVIGATION
+   문제 이동 시에만 PLAY 시작 위치를 질문으로 초기화한다.
    ======================================================================== */
 
 function moveLicenseQuestion(direction) {
@@ -6641,11 +6642,12 @@ function moveLicenseQuestion(direction) {
 
   licenseQuestionIndex = nextIndex;
 
+  window.CONVERSATION_V2_ROLE_TARGET_TURN = 1;
+
   saveLicenseResume();
 
   renderLicenseQuestion();
 }
-
 
 function skipLicenseQuestion() {
   if (
@@ -6658,7 +6660,6 @@ function skipLicenseQuestion() {
 
   moveLicenseQuestion(1);
 }
-
 
 function quitLicenseQuestion() {
   saveLicenseResume();
@@ -6684,7 +6685,6 @@ function quitLicenseQuestion() {
 /* ========================================================================
    BLOCK 31400 END : LICENSE QUESTION NAVIGATION
    ======================================================================== */
-
 
 
 
@@ -9002,6 +9002,557 @@ document.addEventListener(
 
 
 
+
+
+/* ========================================================================
+   BLOCK 32410 START : LICENSE DICTIONARY OPENED WORD STATE
+   재렌더링 뒤에도 두 번째 클릭 단어의 파랑 표시를 유지한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  var lastWordKey = '';
+  var lastWordClickedAt = 0;
+
+  function normalizeWord(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/^[^a-z]+|[^a-z'-]+$/g, '');
+  }
+
+  function clearOpenedDictionaryWord() {
+    document
+      .querySelectorAll(
+        '.license-dictionary-word.is-dictionary-open, ' +
+        '.conversation-tts-word.is-dictionary-open'
+      )
+      .forEach(function (element) {
+        element.classList.remove(
+          'is-dictionary-open'
+        );
+      });
+  }
+
+  function markRenderedDictionaryWord(
+    turnNumber,
+    wordText
+  ) {
+    var card = Array.from(
+      document.querySelectorAll(
+        '#licenseLesson .conversation-turn-card'
+      )
+    ).find(function (element) {
+      return Number(element.dataset.turn) ===
+        Number(turnNumber);
+    });
+
+    if (!card) {
+      return;
+    }
+
+    var word = Array.from(
+      card.querySelectorAll(
+        '.license-dictionary-word, .conversation-tts-word'
+      )
+    ).find(function (element) {
+      return normalizeWord(
+        element.textContent
+      ) === wordText;
+    });
+
+    if (!word) {
+      return;
+    }
+
+    clearOpenedDictionaryWord();
+
+    word.classList.add(
+      'is-dictionary-open'
+    );
+  }
+
+  document.addEventListener(
+    'click',
+    function (event) {
+      var word = event.target.closest(
+        '.license-dictionary-word, .conversation-tts-word'
+      );
+
+      if (!word) {
+        return;
+      }
+
+      var card = word.closest(
+        '.conversation-turn-card'
+      );
+
+      var wordText = normalizeWord(
+        word.textContent
+      );
+
+      var turnNumber =
+        card?.dataset.turn || '';
+
+      var wordKey =
+        String(turnNumber) +
+        '|' +
+        wordText;
+
+      var now = Date.now();
+
+      if (
+        wordKey === lastWordKey &&
+        now - lastWordClickedAt < 1500
+      ) {
+        window.setTimeout(
+          function () {
+            markRenderedDictionaryWord(
+              turnNumber,
+              wordText
+            );
+          },
+          80
+        );
+      } else {
+        clearOpenedDictionaryWord();
+      }
+
+      lastWordKey = wordKey;
+      lastWordClickedAt = now;
+    },
+    true
+  );
+
+  document.addEventListener(
+    'dblclick',
+    function (event) {
+      var word = event.target.closest(
+        '.license-dictionary-word, .conversation-tts-word'
+      );
+
+      if (!word) {
+        return;
+      }
+
+      var card = word.closest(
+        '.conversation-turn-card'
+      );
+
+      window.setTimeout(
+        function () {
+          markRenderedDictionaryWord(
+            card?.dataset.turn || '',
+            normalizeWord(word.textContent)
+          );
+        },
+        80
+      );
+    },
+    true
+  );
+})();
+
+/* ========================================================================
+   BLOCK 32410 END : LICENSE DICTIONARY OPENED WORD STATE
+   ======================================================================== */
+
+
+
+/* ========================================================================
+   BLOCK 32420 START : LICENSE SENTENCE YELLOW SELECTION
+   문제 재렌더링 뒤에도 선택한 문장의 노란 박스를 유지한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  var originalSelectCurrentRoleTurn =
+    selectCurrentRoleTurn;
+
+  var originalGetCurrentRoleTargetTurn =
+    getCurrentRoleTargetTurn;
+
+  function getLicenseSentenceCards() {
+    return Array.from(
+      document.querySelectorAll(
+        '#licenseLesson .conversation-turn-card'
+      )
+    );
+  }
+
+  function selectLicenseSentenceCardByTurn(turnNumber) {
+    var card = getLicenseSentenceCards().find(
+      function (element) {
+        return Number(element.dataset.turn) ===
+          Number(turnNumber);
+      }
+    );
+
+    if (!card) {
+      return null;
+    }
+
+    getLicenseSentenceCards().forEach(
+      function (element) {
+        element.classList.remove(
+          'is-role-target'
+        );
+      }
+    );
+
+    card.classList.add('is-role-target');
+
+    window.CONVERSATION_V2_ROLE_TARGET_TURN =
+      Number(card.dataset.turn) || 1;
+
+    return card;
+  }
+
+  selectCurrentRoleTurn = function (turnNumber) {
+    var selected =
+      selectLicenseSentenceCardByTurn(
+        turnNumber
+      );
+
+    if (selected) {
+      return selected;
+    }
+
+    return originalSelectCurrentRoleTurn(
+      turnNumber
+    );
+  };
+
+  getCurrentRoleTargetTurn = function () {
+    var card = document.querySelector(
+      '#licenseLesson ' +
+      '.conversation-turn-card.is-role-target'
+    );
+
+    if (card) {
+      return Number(card.dataset.turn) || 1;
+    }
+
+    return originalGetCurrentRoleTargetTurn();
+  };
+
+  document.addEventListener(
+    'click',
+    function (event) {
+      var clickedCard = event.target.closest(
+        '#licenseLesson .conversation-turn-card'
+      );
+
+      if (!clickedCard) {
+        return;
+      }
+
+      var clickedTurn = clickedCard.dataset.turn;
+
+      window.setTimeout(
+        function () {
+          selectLicenseSentenceCardByTurn(
+            clickedTurn
+          );
+        },
+        0
+      );
+    },
+    true
+  );
+})();
+
+/* ========================================================================
+   BLOCK 32420 END : LICENSE SENTENCE YELLOW SELECTION
+   ======================================================================== */
+
+
+
+
+/* ========================================================================
+   BLOCK 32440 START : LICENSE AZURE DICTIONARY FALLBACK
+   기존 사전에 번역이 없을 때만 Azure 번역과 DB 캐시를 사용한다.
+   ======================================================================== */
+
+(function () {
+  'use strict';
+
+  var lastWordKey = '';
+  var lastClickedAt = 0;
+  var pendingLookup = null;
+
+  function getSecondLanguageName() {
+    var select = document.getElementById(
+      'secondaryLanguageSelect'
+    );
+
+    if (!select || !select.selectedOptions[0]) {
+      return '';
+    }
+
+    var language = String(
+      select.selectedOptions[0].textContent || ''
+    ).trim();
+
+    return (
+      language &&
+      language.toLowerCase() !== 'none' &&
+      language.toLowerCase() !== 'english'
+    )
+      ? language
+      : '';
+  }
+
+  function normalizeWord(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/^[^a-z]+|[^a-z'-]+$/g, '');
+  }
+
+  function setPopupText(
+    word,
+    language,
+    translation,
+    status
+  ) {
+    var popup = document.getElementById(
+      'licenseDictionaryPopup'
+    );
+
+    if (!popup) {
+      return;
+    }
+
+    popup.querySelector(
+      '.license-dictionary-word-title'
+    ).textContent = word;
+
+    popup.querySelector(
+      '.license-dictionary-base'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-korean'
+    ).textContent = translation
+      ? language + ': ' + translation
+      : '';
+
+    popup.querySelector(
+      '.license-dictionary-definition'
+    ).textContent = '';
+
+    popup.querySelector(
+      '.license-dictionary-status'
+    ).textContent = status || '';
+
+    popup.hidden = false;
+  }
+
+  async function requestAzureTranslation() {
+    var request = pendingLookup;
+
+    if (!request || request.loading) {
+      return;
+    }
+
+    request.loading = true;
+
+    setPopupText(
+      request.word,
+      request.language,
+      '',
+      'Azure translating...'
+    );
+
+    try {
+      var config = window.LICENSE_CONFIG?.dictionary;
+
+      var response = await fetch(
+        config.url +
+          '/functions/v1/' +
+          config.azureFunctionName,
+        {
+          method: 'POST',
+
+          headers: {
+            apikey: config.publishableKey,
+
+            Authorization:
+              'Bearer ' + config.publishableKey,
+
+            'Content-Type':
+              'application/json'
+          },
+
+          body: JSON.stringify({
+            word: request.word,
+            language: request.language
+          })
+        }
+      );
+
+      var result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ||
+          'Azure translation failed.'
+        );
+      }
+
+      setPopupText(
+        request.word,
+        request.language,
+        result.translation,
+        result.source === 'cache'
+          ? 'Dictionary cache'
+          : 'Azure saved to Dictionary cache'
+      );
+    } catch (error) {
+      console.error(
+        '[LICENSE] Azure dictionary failed:',
+        error
+      );
+
+      setPopupText(
+        request.word,
+        request.language,
+        '',
+        'Translation is temporarily unavailable.'
+      );
+    } finally {
+      pendingLookup = null;
+    }
+  }
+
+  function checkDictionaryFallback() {
+    var request = pendingLookup;
+
+    if (!request || request.loading) {
+      return;
+    }
+
+    var popup = document.getElementById(
+      'licenseDictionaryPopup'
+    );
+
+    if (!popup || popup.hidden) {
+      return;
+    }
+
+    var translated = String(
+      popup.querySelector(
+        '.license-dictionary-korean'
+      )?.textContent || ''
+    ).trim();
+
+    if (translated) {
+      pendingLookup = null;
+      return;
+    }
+
+    var status = String(
+      popup.querySelector(
+        '.license-dictionary-status'
+      )?.textContent || ''
+    );
+
+    if (/searching/i.test(status)) {
+      return;
+    }
+
+    if (
+      /not registered|사전 항목이 없습니다|not found/i
+        .test(status)
+    ) {
+      requestAzureTranslation();
+    }
+  }
+
+  function installAzureDictionaryFallback() {
+    document.addEventListener(
+      'click',
+      function (event) {
+        var word = event.target.closest(
+          '.license-dictionary-word, .conversation-tts-word'
+        );
+
+        if (!word) {
+          return;
+        }
+
+        var card = word.closest(
+          '.conversation-turn-card'
+        );
+
+        var wordText = normalizeWord(
+          word.textContent
+        );
+
+        var wordKey =
+          String(card?.dataset.turn || '') +
+          '|' +
+          wordText;
+
+        var now = Date.now();
+
+        if (
+          wordKey === lastWordKey &&
+          now - lastClickedAt < 1500
+        ) {
+          var language = getSecondLanguageName();
+
+          if (language) {
+            pendingLookup = {
+              word: wordText,
+              language: language,
+              loading: false
+            };
+
+            window.setTimeout(
+              checkDictionaryFallback,
+              500
+            );
+          }
+        }
+
+        lastWordKey = wordKey;
+        lastClickedAt = now;
+      },
+      true
+    );
+
+    new MutationObserver(
+      function () {
+        window.setTimeout(
+          checkDictionaryFallback,
+          0
+        );
+      }
+    ).observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      installAzureDictionaryFallback,
+      { once: true }
+    );
+  } else {
+    installAzureDictionaryFallback();
+  }
+})();
+
+/* ========================================================================
+   BLOCK 32440 END : LICENSE AZURE DICTIONARY FALLBACK
+   ======================================================================== */
+
+   
 
 
   

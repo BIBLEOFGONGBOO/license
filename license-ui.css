@@ -1879,3 +1879,19 @@ html[data-license-explain="off"]
 /* ==========================================================================
    BLOCK 3030 END : LICENSE AI TUTOR UI
    ========================================================================== */
+
+
+   /* ==========================================================================
+   BLOCK 3040 START : LICENSE DICTIONARY OPENED WORD HIGHLIGHT
+   ========================================================================== */
+
+.license-dictionary-word.is-dictionary-open,
+.conversation-tts-word.is-dictionary-open {
+  background: #dbeafe;
+  color: #075ea8;
+  box-shadow: inset 0 -2px 0 #2563eb;
+}
+
+/* ==========================================================================
+   BLOCK 3040 END : LICENSE DICTIONARY OPENED WORD HIGHLIGHT
+   ========================================================================== */

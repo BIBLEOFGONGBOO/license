@@ -18,7 +18,8 @@ window.LICENSE_CONFIG = Object.freeze({
     url: 'https://vejhetvwkjgylglzsxpr.supabase.co',
     publishableKey:
       'sb_publishable_53Lu670zxoCEI90tKbYwsA_EhMYSeCy',
-    table: 'dictionary'
+    table: 'dictionary',
+    azureFunctionName: 'hyper-worker'
   })
 });
 
