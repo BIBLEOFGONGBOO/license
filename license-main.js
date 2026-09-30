@@ -8317,12 +8317,31 @@ async function selectLicenseCourseSet(course, setIndex) {
 
   const settings = getLicenseCourseSettings(course);
 
-  licenseCourseWindowStart = setIndex * settings.setSize;
+  licenseCourseWindowStart =
+  setIndex * settings.setSize;
 
-  if (elements.status) {
-    elements.status.textContent =
-      'Loading ' + getLicenseSetLabel(course, setIndex);
-  }
+if (elements.list) {
+  elements.list.replaceChildren();
+
+  const loading = document.createElement('div');
+
+  loading.className =
+    'conversation-directory-item is-directory-title';
+
+  loading.textContent =
+    'LOADING… ' +
+    getLicenseSetLabel(course, setIndex);
+
+  loading.style.pointerEvents = 'none';
+
+  elements.list.appendChild(loading);
+}
+
+if (elements.status) {
+  elements.status.textContent =
+    'Loading ' +
+    getLicenseSetLabel(course, setIndex);
+}
 
   try {
     const result = await fetchLicenseQuestions(
@@ -10197,9 +10216,12 @@ document.addEventListener(
 
     if (context && subtitle) {
       subtitle.textContent =
-        context.SUBJECT +
-        ' · Question ' +
-        context.N;
+  context.SUBJECT +
+  ' · #' +
+  (
+    context.QUESTION_ID ||
+    context.N
+  );
     }
   }
 
