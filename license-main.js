@@ -6089,7 +6089,25 @@ async function fetchLicenseQuestions(
 
         product: productCode,
 
-        languages: ['en', 'ko'],
+        languages: [
+  String(
+    document.getElementById(
+      'primaryLanguageSelect'
+    )?.value || 'EN'
+  ).toLowerCase(),
+
+  String(
+    document.getElementById(
+      'secondaryLanguageSelect'
+    )?.value || 'NONE'
+  ).toLowerCase()
+]
+  .filter(function (code, index, codes) {
+    return (
+      ['en', 'ko', 'es'].includes(code) &&
+      codes.indexOf(code) === index
+    );
+  }),
 
         limit: limit,
 
@@ -6150,7 +6168,9 @@ async function fetchLicenseQuestions(
 
           english: byLanguage.en || {},
 
-          korean: byLanguage.ko || {}
+          korean: byLanguage.ko || {},
+
+          spanish: byLanguage.es || {}
         };
       });
   }
@@ -6272,7 +6292,11 @@ function renderLicenseQuestion() {
     secondaryLanguage
   ].filter(function (code, index, values) {
     return (
-      (code === 'EN' || code === 'KO') &&
+      (
+  code === 'EN' ||
+  code === 'KO' ||
+  code === 'ES'
+) &&
       values.indexOf(code) === index
     );
   });
@@ -6290,12 +6314,16 @@ function renderLicenseQuestion() {
   };
 
   function getText(language, field) {
-    const translation = language === 'KO'
-      ? question.korean
-      : question.english;
+  const translation = language === 'KO'
+    ? question.korean
+    : (
+      language === 'ES'
+        ? question.spanish
+        : question.english
+    );
 
-    return translation[field] || '';
-  }
+  return translation[field] || '';
+}
 
   function appendSpeechText(
     container,
@@ -6370,6 +6398,21 @@ function renderLicenseQuestion() {
 
   prompt.appendChild(questionCard);
 
+function finishLicenseChoiceText(language, text) {
+  const value = String(text || '').trim();
+
+  if (
+    !value ||
+    language === 'KO' ||
+    /[.!?…]$/.test(value)
+  ) {
+    return value;
+  }
+
+  return value + '.';
+}
+
+
   [1, 2, 3, 4].forEach(function (number) {
     const choice = document.createElement('button');
 
@@ -6404,7 +6447,10 @@ function renderLicenseQuestion() {
         content,
         'span',
         language,
-        getText(language, 'option_' + number),
+        finishLicenseChoiceText(
+  language,
+  getText(language, 'option_' + number)
+),
         position,
         'license-choice-' +
           (language === 'KO' ? 'korean' : 'english')
@@ -6547,8 +6593,12 @@ function renderLicenseQuestion() {
           : 'language-line-en');
 
       line.textContent = language === 'KO'
-        ? question.korean.explanation || ''
-        : question.english.explanation || '';
+  ? question.korean.explanation || ''
+  : (
+    language === 'ES'
+      ? question.spanish.explanation || ''
+      : question.english.explanation || ''
+  );
 
       if (line.textContent) {
         explanation.appendChild(line);
