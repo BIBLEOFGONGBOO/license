@@ -5903,6 +5903,11 @@ async function renderLicenseDirectory() {
     }
 
 
+
+
+
+
+
     licenseCourses.forEach(function (course) {
       const item = document.createElement('button');
 
@@ -8819,6 +8824,62 @@ renderLicenseDirectory = async function () {
           )
         );
       });
+
+
+    const resumeLesson =
+      getLicenseResumeSnapshot()?.lesson;
+
+    if (
+      resumeLesson?.course &&
+      Array.isArray(resumeLesson.questionPool) &&
+      resumeLesson.questionPool.length
+    ) {
+      const resumeSettings =
+        getLicenseCourseSettings(
+          resumeLesson.course
+        );
+
+      const resumeQuestion =
+        Math.max(
+          0,
+          Number(resumeLesson.windowStart) || 0
+        ) +
+        Math.max(
+          0,
+          Number(resumeLesson.questionIndex) || 0
+        ) +
+        1;
+
+      const resumeButton =
+        document.createElement('button');
+
+      resumeButton.type = 'button';
+
+      resumeButton.className =
+        'conversation-directory-item is-directory-title';
+
+      resumeButton.textContent =
+        'RESUME · ' +
+        resumeSettings.title +
+        ' · Question ' +
+        resumeQuestion;
+
+      resumeButton.style.background =
+        '#172033';
+
+      resumeButton.style.color = '#ffffff';
+
+      resumeButton.style.fontWeight = '700';
+
+      resumeButton.onclick =
+        resumeStoredLicenseLesson;
+
+      elements.list.appendChild(resumeButton);
+    }
+
+
+
+
 
     licenseCourses.forEach(function (course) {
       const settings = getLicenseCourseSettings(
