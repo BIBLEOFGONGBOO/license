@@ -96,14 +96,24 @@ body {
 }
 
 .conversation-system-split {
-  position: relative;
   min-width: 0;
 }
 
-.conversation-system-split #systemMenuButton {
+.conversation-system-split #homeButton {
+  display: grid;
+  place-items: center;
   padding: 0;
-  font-size: 21px;
-  line-height: 1;
+  color: #075ea8;
+}
+
+.conversation-system-split #homeButton svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .conversation-play-split {
@@ -149,69 +159,6 @@ body {
 }
 
 
-/* ==========================================================================
-   🟦 BLOCK 2223: SYSTEM MENU FIXED INDEX
-   Purpose: Keep header controls fixed and show the system menu full width.
-   ========================================================================== */
-
-#systemMenuPanel {
-  position: fixed;
-  top: 80px;
-  left: 50%;
-  z-index: 60;
-
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0;
-
-  width: min(
-    calc(100vw - 24px),
-    696px
-  );
-
-  max-height: calc(100dvh - 96px);
-  margin: 0;
-  padding: 0;
-  overflow-y: auto;
-
-  border: 1px solid #cbd5e1;
-  border-radius: 0;
-  background: #ffffff;
-
-  transform: translateX(-50%);
-
-  box-shadow:
-    0 10px 24px
-    rgb(23 32 51 / 18%);
-}
-
-#systemMenuPanel button {
-  min-height: 0;
-  padding: 9px 10px;
-  border: 0;
-  border-bottom: 1px solid #dbe3ee;
-  border-radius: 0;
-  background: transparent;
-  color: #172033;
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1.35;
-  text-align: left;
-}
-
-#systemMenuPanel button:last-child {
-  border-bottom: 0;
-}
-
-#systemMenuPanel button:first-child {
-  background: #eaf5ff;
-  color: #075ea8;
-  font-weight: 900;
-}
-
-/* ==========================================================================
-   END: SYSTEM MENU FIXED INDEX
-   ========================================================================== */
 
 
 

@@ -23,10 +23,6 @@ function getCurrentCategoryNavigationRows() {
 function getConversationMenus() {
   return [
     {
-      buttonId: 'systemMenuButton',
-      panelId: 'systemMenuPanel'
-    },
-    {
       buttonId: 'playMenuButton',
       panelId: 'playMenuPanel'
     },
@@ -4853,8 +4849,8 @@ if (document.readyState === 'loading') {
 
 function getCurrentButtonHoverHelp(button) {
   var helpById = {
-    systemMenuButton:
-      '시스템 메뉴 열기',
+    homeButton:
+  'Gongboo 홈으로 이동',
 
     playButton:
       '현재 선택 문장부터 재생',
@@ -5533,54 +5529,26 @@ function installLicenseResumePersistence() {
 
 
   /* ========================================================================
-     BLOCK 21400 : LICENSE MENU CONNECTION
-     LICENSE 클릭을 Conversation Template보다 먼저 처리하고 메뉴를 닫는다.
-     ======================================================================== */
+   BLOCK 21400 : LICENSE HOME BUTTON
+   ======================================================================== */
 
-  function installLicenseMenuConnection() {
-    window.addEventListener(
-      'click',
-      function (event) {
-        const button = event.target.closest(
-          '[data-system-key]'
-        );
+function installLicenseHomeButton() {
+  var button =
+    document.getElementById('homeButton');
 
-        if (!button) {
-          return;
-        }
-
-        if (button.dataset.systemKey !== 'license') {
-          return;
-        }
-
-        event.preventDefault();
-
-        event.stopImmediatePropagation();
-
-        const systemMenu = document.getElementById(
-          'systemMenuPanel'
-        );
-
-        const systemMenuButton = document.getElementById(
-          'systemMenuButton'
-        );
-
-        if (systemMenu) {
-          systemMenu.hidden = true;
-        }
-
-        if (systemMenuButton) {
-          systemMenuButton.setAttribute(
-            'aria-expanded',
-            'false'
-          );
-        }
-
-        renderLicenseDirectory();
-      },
-      true
-    );
+  if (!button) {
+    return;
   }
+
+  button.onclick = function() {
+    var config = window.LICENSE_CONFIG || {};
+
+    window.location.assign(
+      config.homeUrl ||
+        'https://gongboo-home.pages.dev/'
+    );
+  };
+}
 
 
 
@@ -5646,7 +5614,7 @@ function bootLicenseExtension() {
 
   installLicenseAuthButton();
 
-  installLicenseMenuConnection();
+  installLicenseHomeButton();
 
   installLicenseModeSettings();
 

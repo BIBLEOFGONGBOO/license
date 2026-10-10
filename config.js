@@ -3,6 +3,8 @@
    ========================================================================== */
 
 window.LICENSE_CONFIG = Object.freeze({
+  homeUrl: 'https://gongboo-home.pages.dev/',
+  
   /* PART 1 : EasyLearning License service */
   url: 'https://mlpyhuwrkwdtzpswaqgf.supabase.co',
 
