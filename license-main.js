@@ -6435,7 +6435,7 @@ function finishLicenseChoiceText(language, text) {
 
     if (licenseMode === 'learn' && correct) {
       choice.classList.add('correct', 'disabled');
-      choice.disabled = true;
+      choice.setAttribute('aria-disabled', 'true');
     }
 
     if (licenseMode === 'study' && currentAnswer !== null) {
