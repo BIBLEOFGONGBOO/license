@@ -8159,10 +8159,17 @@ function getLicenseCourseSettings(course) {
       override.displayOrder ?? defaults.displayOrder
     ) || 999,
 
-    setSize: Math.max(
-      1,
-      Number(override.setSize || defaults.setSize) || 100
-    ),
+    /* BLOCK 32020의 getLicenseCourseSettings 안 setSize 부분 교체 */
+
+setSize: Math.max(
+  1,
+  Number(
+    override.setSize ||
+    course?.setSize ||
+    course?.set_size ||
+    defaults.setSize
+  ) || 100
+),
 
     preloadSets: Math.max(
       1,
@@ -8580,7 +8587,8 @@ showLicenseResults = function () {
 
 /* ============================================================================
    BLOCK 32030 START : LICENSE COURSE FIRST DIRECTORY
-   첫 화면은 과목만 표시하고, 과목 선택 후 SET 목록을 연다.
+   첫 화면은 license_products를 직접 조회한다.
+   저장된 목차는 즉시 표시하고, 새 과목 코드가 추가될 때만 갱신한다.
    ========================================================================== */
 
 let licenseDirectoryRenderToken = 0;
@@ -8588,6 +8596,9 @@ let licenseDirectoryRenderToken = 0;
 let licenseCatalogCache = null;
 
 let licenseCatalogPromise = null;
+
+const LICENSE_PRODUCT_DIRECTORY_STORAGE_KEY =
+  'gongboo-license-product-directory-v1';
 
 
 function getLicenseCatalogOnce() {
@@ -8610,6 +8621,126 @@ function getLicenseCatalogOnce() {
     });
 
   return licenseCatalogPromise;
+}
+
+
+function getStoredLicenseProductDirectory() {
+  try {
+    const rows = JSON.parse(
+      localStorage.getItem(
+        LICENSE_PRODUCT_DIRECTORY_STORAGE_KEY
+      ) || '[]'
+    );
+
+    return Array.isArray(rows)
+      ? rows.filter(function (row) {
+          return (
+            typeof row?.product_code === 'string' &&
+            typeof row?.title === 'string'
+          );
+        })
+      : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+
+function saveLicenseProductDirectory(rows) {
+  try {
+    localStorage.setItem(
+      LICENSE_PRODUCT_DIRECTORY_STORAGE_KEY,
+      JSON.stringify(rows)
+    );
+  } catch (error) {
+    console.warn(
+      '[LICENSE] Product directory cache save failed:',
+      error
+    );
+  }
+}
+
+
+async function fetchLicenseProductDirectory() {
+  const config = window.LICENSE_CONFIG;
+
+  const response = await fetch(
+    config.url +
+      '/rest/v1/license_products' +
+      '?select=product_code,title,set_size' +
+      '&active=eq.true' +
+      '&order=title.asc',
+    {
+      headers: {
+        apikey: config.publishableKey,
+        Authorization:
+          'Bearer ' + config.publishableKey
+      }
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(
+      'License product directory request failed.'
+    );
+  }
+
+  return response.json();
+}
+
+
+function getNewLicenseProductCodes(
+  storedProducts,
+  latestProducts
+) {
+  const storedCodes = new Set(
+    storedProducts.map(function (product) {
+      return getLicenseCourseKey(
+        product.product_code
+      );
+    })
+  );
+
+  return latestProducts.filter(function (product) {
+    return !storedCodes.has(
+      getLicenseCourseKey(
+        product.product_code
+      )
+    );
+  });
+}
+
+
+async function ensureLicenseCourseQuestionCount(course) {
+  if (Number(course.totalQuestionCount) > 0) {
+    return;
+  }
+
+  const products = await getLicenseCatalogOnce();
+
+  const matchedCourse = normalizeLicenseCourses(
+    products
+  ).find(function (product) {
+    return (
+      getLicenseCourseKey(product) ===
+      getLicenseCourseKey(course)
+    );
+  });
+
+  if (!matchedCourse) {
+    throw new Error(
+      'Course details could not be loaded.'
+    );
+  }
+
+  course.totalQuestionCount =
+    matchedCourse.totalQuestionCount;
+
+  course.setCount = matchedCourse.setCount;
+
+  if (!course.setSize) {
+    course.setSize = matchedCourse.setSize;
+  }
 }
 
 
@@ -8753,8 +8884,16 @@ renderLicenseDirectory = async function () {
   elements.breadcrumb.appendChild(home);
 
   try {
-    const products =
-      await getLicenseCatalogOnce();
+    const storedProducts =
+      getStoredLicenseProductDirectory();
+
+    const products = storedProducts.length
+      ? storedProducts
+      : await fetchLicenseProductDirectory();
+
+    if (!storedProducts.length) {
+      saveLicenseProductDirectory(products);
+    }
 
     if (
       renderToken !==
@@ -8792,7 +8931,6 @@ renderLicenseDirectory = async function () {
           )
         );
       });
-
 
     const resumeLesson =
       getLicenseResumeSnapshot()?.lesson;
@@ -8845,10 +8983,6 @@ renderLicenseDirectory = async function () {
       elements.list.appendChild(resumeButton);
     }
 
-
-
-
-
     licenseCourses.forEach(function (course) {
       const settings = getLicenseCourseSettings(
         course
@@ -8863,8 +8997,19 @@ renderLicenseDirectory = async function () {
 
       item.textContent = settings.title;
 
-      item.onclick = function () {
-        renderLicenseCourseSetDirectory(course);
+      item.onclick = async function () {
+        try {
+          await ensureLicenseCourseQuestionCount(
+            course
+          );
+
+          renderLicenseCourseSetDirectory(course);
+        } catch (error) {
+          console.error(
+            '[LICENSE] Course detail load failed:',
+            error
+          );
+        }
       };
 
       elements.list.appendChild(item);
@@ -8873,6 +9018,38 @@ renderLicenseDirectory = async function () {
     if (elements.status) {
       elements.status.textContent =
         'Select a course';
+    }
+
+    if (storedProducts.length) {
+      void fetchLicenseProductDirectory()
+        .then(function (latestProducts) {
+          const addedProducts =
+            getNewLicenseProductCodes(
+              storedProducts,
+              latestProducts
+            );
+
+          if (!addedProducts.length) {
+            return;
+          }
+
+          saveLicenseProductDirectory(
+            latestProducts
+          );
+
+          if (
+            renderToken ===
+            licenseDirectoryRenderToken
+          ) {
+            renderLicenseDirectory();
+          }
+        })
+        .catch(function (error) {
+          console.warn(
+            '[LICENSE] Product directory refresh failed:',
+            error
+          );
+        });
     }
   } catch (error) {
     if (
@@ -8904,6 +9081,8 @@ renderLicenseDirectory = async function () {
 /* ============================================================================
    BLOCK 32030 END : LICENSE COURSE FIRST DIRECTORY
    ========================================================================== */
+
+
 
    
 
