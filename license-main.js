@@ -9243,6 +9243,7 @@ showLicenseResults = function () {
 
 /* ========================================================================
    BLOCK 32100 START : LICENSE WORD DICTIONARY
+   번역은 Azure, 영영 정의는 Free Dictionary API 서버 함수로 분리한다.
    ======================================================================== */
 
 (function () {
@@ -9323,6 +9324,29 @@ showLicenseResults = function () {
       .toUpperCase();
 
     return dictionaryLanguageColumns[code] || null;
+  }
+
+  function isEnglishOnlyDictionaryMode() {
+    var primaryLanguage = String(
+      document.getElementById(
+        'primaryLanguageSelect'
+      )?.value || ''
+    ).toUpperCase();
+
+    var secondaryLanguage = String(
+      document.getElementById(
+        'secondaryLanguageSelect'
+      )?.value || ''
+    ).toUpperCase();
+
+    return (
+      primaryLanguage === 'EN' &&
+      (
+        !secondaryLanguage ||
+        secondaryLanguage === 'NONE' ||
+        secondaryLanguage === 'EN'
+      )
+    );
   }
 
   function normalizeDictionaryWord(value) {
@@ -9417,6 +9441,15 @@ showLicenseResults = function () {
       ).trim()
       : '';
 
+    var definitionLines = String(
+      entry.English_Definition || ''
+    )
+      .split('|')
+      .map(function (line) {
+        return String(line || '').trim();
+      })
+      .filter(Boolean);
+
     popup.querySelector(
       '.license-dictionary-word-title'
     ).textContent = word;
@@ -9438,9 +9471,11 @@ showLicenseResults = function () {
 
     popup.querySelector(
       '.license-dictionary-definition'
-    ).textContent = String(
-      entry.English_Definition || ''
-    ).replace(/\s*\|\s*/g, '\n• ');
+    ).textContent = definitionLines
+      .map(function (line) {
+        return '• ' + line;
+      })
+      .join('\n');
 
     popup.querySelector(
       '.license-dictionary-status'
@@ -9545,6 +9580,82 @@ showLicenseResults = function () {
     rows = await response.json();
 
     return rows.length ? rows[0] : null;
+  }
+
+
+function showEnglishDefinitionLoading(word) {
+  var popup = getDictionaryPopup();
+
+  popup.querySelector(
+    '.license-dictionary-word-title'
+  ).textContent = word;
+
+  popup.querySelector(
+    '.license-dictionary-base'
+  ).textContent = '';
+
+  popup.querySelector(
+    '.license-dictionary-korean'
+  ).textContent = '';
+
+  popup.querySelector(
+    '.license-dictionary-definition'
+  ).textContent =
+    'Looking up an English definition...';
+
+  popup.querySelector(
+    '.license-dictionary-status'
+  ).textContent = '';
+
+  popup.hidden = false;
+}
+
+
+
+  async function fetchEnglishDefinitionEntry(word) {
+    var config = getDictionaryConfig();
+
+    if (
+      !config ||
+      !config.definitionFunctionName ||
+      !word
+    ) {
+      return null;
+    }
+
+    var response = await fetch(
+      config.url +
+        '/functions/v1/' +
+        config.definitionFunctionName,
+      {
+        method: 'POST',
+
+        headers: {
+          apikey: config.publishableKey,
+
+          Authorization:
+            'Bearer ' + config.publishableKey,
+
+          'Content-Type':
+            'application/json'
+        },
+
+        body: JSON.stringify({
+          word: word
+        })
+      }
+    );
+
+    var result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error ||
+        'English definition request failed.'
+      );
+    }
+
+    return result.entry || null;
   }
 
   function clearDictionarySelection() {
@@ -9677,17 +9788,49 @@ showLicenseResults = function () {
               translationLanguage
             );
 
-            if (entry) {
-              showDictionaryEntry(
-                entry,
-                translationLanguage
-              );
-            } else {
-              showDictionaryMessage(
-                '"' + word + '" 사전 항목이 없습니다.'
-              );
+            var needsEnglishDefinition =
+              isEnglishOnlyDictionaryMode() &&
+              !String(
+                entry?.English_Definition || ''
+              ).trim();
+
+            if (needsEnglishDefinition || !entry) {
+              if (!isEnglishOnlyDictionaryMode()) {
+                showDictionaryMessage(
+                  '"' + word + '" 사전 항목이 없습니다.'
+                );
+
+                return;
+              }
+
+              showEnglishDefinitionLoading(word);
+
+var definitionEntry =
+  await fetchEnglishDefinitionEntry(word);
+              if (definitionEntry) {
+                showDictionaryEntry(
+                  definitionEntry,
+                  null
+                );
+              } else {
+                showDictionaryMessage(
+                  '"' + word + '" 사전 항목이 없습니다.'
+                );
+              }
+
+              return;
             }
+
+            showDictionaryEntry(
+              entry,
+              translationLanguage
+            );
           } catch (error) {
+            console.error(
+              '[LICENSE] Dictionary lookup failed:',
+              error
+            );
+
             showDictionaryMessage(
               '사전을 불러오지 못했습니다.'
             );
@@ -9721,7 +9864,6 @@ showLicenseResults = function () {
 /* ========================================================================
    BLOCK 32100 END : LICENSE WORD DICTIONARY
    ======================================================================== */
-
 
 
 
@@ -11158,17 +11300,17 @@ document.addEventListener(
           var language = getSecondLanguageName();
 
           if (language) {
-            pendingLookup = {
-              word: wordText,
-              language: language,
-              loading: false
-            };
+  pendingLookup = {
+    word: wordText,
+    language: language,
+    loading: false
+  };
 
-            window.setTimeout(
-              checkDictionaryFallback,
-              500
-            );
-          }
+  window.setTimeout(
+    checkDictionaryFallback,
+    500
+  );
+}
         }
 
         lastWordKey = wordKey;
@@ -11220,70 +11362,112 @@ document.addEventListener(
   var updating = false;
 
   function simplifyDictionaryPopup() {
-    if (updating) {
-      return;
-    }
-
-    var popup = document.getElementById(
-      'licenseDictionaryPopup'
-    );
-
-    if (!popup) {
-      return;
-    }
-
-    var base = popup.querySelector(
-      '.license-dictionary-base'
-    );
-
-    var definition = popup.querySelector(
-      '.license-dictionary-definition'
-    );
-
-    var status = popup.querySelector(
-      '.license-dictionary-status'
-    );
-
-    var translation = popup.querySelector(
-      '.license-dictionary-korean'
-    );
-
-    if (base) {
-      base.textContent = '';
-      base.style.display = 'none';
-    }
-
-    if (definition) {
-      definition.textContent = '';
-      definition.style.display = 'none';
-    }
-
-    if (status) {
-      status.textContent = '';
-      status.style.display = 'none';
-    }
-
-    if (translation) {
-      var simpleTranslation = String(
-        translation.textContent || ''
-      ).replace(
-        /^[^:]{1,40}:\s*/,
-        ''
-      ).trim();
-
-      if (
-        translation.textContent !==
-        simpleTranslation
-      ) {
-        updating = true;
-
-        translation.textContent =
-          simpleTranslation;
-
-        updating = false;
-      }
-    }
+  if (updating) {
+    return;
   }
+
+  var popup = document.getElementById(
+    'licenseDictionaryPopup'
+  );
+
+  if (!popup) {
+    return;
+  }
+
+  var primaryLanguage = String(
+    document.getElementById(
+      'primaryLanguageSelect'
+    )?.value || ''
+  ).toUpperCase();
+
+  var secondaryLanguage = String(
+    document.getElementById(
+      'secondaryLanguageSelect'
+    )?.value || ''
+  ).toUpperCase();
+
+  var isEnglishOnly =
+    primaryLanguage === 'EN' &&
+    (
+      !secondaryLanguage ||
+      secondaryLanguage === 'NONE' ||
+      secondaryLanguage === 'EN'
+    );
+
+  var base = popup.querySelector(
+    '.license-dictionary-base'
+  );
+
+  var definition = popup.querySelector(
+    '.license-dictionary-definition'
+  );
+
+  var status = popup.querySelector(
+    '.license-dictionary-status'
+  );
+
+  var translation = popup.querySelector(
+    '.license-dictionary-korean'
+  );
+
+  var hasDefinition = Boolean(
+    String(
+      definition?.textContent || ''
+    ).trim()
+  );
+
+  if (base) {
+    base.textContent = '';
+    base.style.display = 'none';
+  }
+
+  if (status) {
+    status.textContent = '';
+    status.style.display = 'none';
+  }
+
+  if (isEnglishOnly && hasDefinition) {
+    if (translation) {
+      translation.textContent = '';
+      translation.style.display = 'none';
+    }
+
+    definition.style.display = 'block';
+    definition.style.whiteSpace = 'pre-line';
+    definition.style.lineHeight = '1.55';
+
+    return;
+  }
+
+  if (definition) {
+    definition.textContent = '';
+    definition.style.display = 'none';
+  }
+
+  if (translation) {
+    var simpleTranslation = String(
+      translation.textContent || ''
+    ).replace(
+      /^[^:]{1,40}:\s*/,
+      ''
+    ).trim();
+
+    if (
+      translation.textContent !==
+      simpleTranslation
+    ) {
+      updating = true;
+
+      translation.textContent =
+        simpleTranslation;
+
+      updating = false;
+    }
+
+    translation.style.display =
+      simpleTranslation ? 'block' : 'none';
+  }
+}
 
   new MutationObserver(function () {
     window.setTimeout(
@@ -11317,61 +11501,113 @@ document.addEventListener(
   var updating = false;
 
   function makeDictionaryInline() {
-    if (updating) {
-      return;
-    }
+  if (updating) {
+    return;
+  }
 
-    var popup = document.getElementById(
-      'licenseDictionaryPopup'
+  var popup = document.getElementById(
+    'licenseDictionaryPopup'
+  );
+
+  if (!popup) {
+    return;
+  }
+
+  var primaryLanguage = String(
+    document.getElementById(
+      'primaryLanguageSelect'
+    )?.value || ''
+  ).toUpperCase();
+
+  var secondaryLanguage = String(
+    document.getElementById(
+      'secondaryLanguageSelect'
+    )?.value || ''
+  ).toUpperCase();
+
+  var isEnglishOnly =
+    primaryLanguage === 'EN' &&
+    (
+      !secondaryLanguage ||
+      secondaryLanguage === 'NONE' ||
+      secondaryLanguage === 'EN'
     );
 
-    if (!popup) {
-      return;
-    }
+  var title = popup.querySelector(
+    '.license-dictionary-word-title'
+  );
 
-    var title = popup.querySelector(
-      '.license-dictionary-word-title'
-    );
+  var translation = popup.querySelector(
+    '.license-dictionary-korean'
+  );
 
-    var translation = popup.querySelector(
-      '.license-dictionary-korean'
-    );
+  var definition = popup.querySelector(
+    '.license-dictionary-definition'
+  );
 
-    if (!title || !translation) {
-      return;
-    }
+  if (!title || !translation || !definition) {
+    return;
+  }
 
-    var rawWord = String(
-      title.textContent || ''
-    ).trim();
+  var rawWord = String(
+    title.textContent || ''
+  ).trim();
 
-    var simpleWord = rawWord
-      .replace(/\s*:\s*.*$/, '')
-      .trim();
+  var simpleWord = rawWord
+    .replace(/\s*:\s*.*$/, '')
+    .trim();
 
-    var simpleTranslation = String(
-      translation.textContent || ''
-    )
-      .replace(/^[^:]{1,40}:\s*/, '')
-      .trim();
+  var simpleTranslation = String(
+    translation.textContent || ''
+  )
+    .replace(/^[^:]{1,40}:\s*/, '')
+    .trim();
 
-    if (!simpleWord || !simpleTranslation) {
-      return;
-    }
+  var detailedDefinition = String(
+    definition.textContent || ''
+  ).trim();
 
-    var inlineText =
-      simpleWord + ': ' + simpleTranslation;
-
-    if (title.textContent !== inlineText) {
+  if (
+    isEnglishOnly &&
+    simpleWord &&
+    detailedDefinition
+  ) {
+    if (title.textContent !== simpleWord) {
       updating = true;
 
-      title.textContent = inlineText;
+      title.textContent = simpleWord;
 
       updating = false;
     }
 
+    translation.textContent = '';
     translation.style.display = 'none';
+
+    definition.style.display = 'block';
+    definition.style.whiteSpace = 'pre-line';
+    definition.style.lineHeight = '1.55';
+
+    return;
   }
+
+  if (!simpleWord || !simpleTranslation) {
+    return;
+  }
+
+  var inlineText =
+    simpleWord + ': ' + simpleTranslation;
+
+  if (title.textContent !== inlineText) {
+    updating = true;
+
+    title.textContent = inlineText;
+
+    updating = false;
+  }
+
+  translation.style.display = 'none';
+  definition.style.display = 'none';
+}
 
 
   document.addEventListener(

@@ -70,15 +70,18 @@ window.LICENSE_CONFIG = Object.freeze({
 
   /* PART 5 : Dictionary and Azure fallback */
   dictionary: Object.freeze({
-    url: 'https://vejhetvwkjgylglzsxpr.supabase.co',
+  url: 'https://vejhetvwkjgylglzsxpr.supabase.co',
 
-    publishableKey:
-      'sb_publishable_53Lu670zxoCEI90tKbYwsA_EhMYSeCy',
+  publishableKey:
+    'sb_publishable_53Lu670zxoCEI90tKbYwsA_EhMYSeCy',
 
-    table: 'dictionary',
+  table: 'dictionary',
 
-    azureFunctionName: 'hyper-worker'
-  })
+  azureFunctionName: 'hyper-worker',
+
+  definitionFunctionName:
+    'dictionary-definition-worker'
+})
 });
 
 /* ============================================================================
