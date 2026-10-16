@@ -9312,7 +9312,9 @@ function hasLicenseCourseAccess(course) {
 }
 
 
-function redirectLicenseToHomeLogin() {
+function redirectLicenseToHomeLogin(
+  forceLogin
+) {
   var membership =
     getLicenseMembershipConfig();
 
@@ -9328,13 +9330,15 @@ function redirectLicenseToHomeLogin() {
   );
 
   /*
-   * 현재 HOME에 다른 계정이 로그인되어 있어도
-   * 반드시 PIN 로그인 화면을 표시한다.
+   * 처음에는 HOME의 현재 로그인 계정을 자동 확인.
+   * 권한 없는 계정일 때만 force_login으로 PIN 입력을 강제한다.
    */
-  loginUrl.searchParams.set(
-    'force_login',
-    '1'
-  );
+  if (forceLogin === true) {
+    loginUrl.searchParams.set(
+      'force_login',
+      '1'
+    );
+  }
 
   loginUrl.searchParams.set(
     'return_to',
@@ -9384,7 +9388,11 @@ async function canOpenLicenseSet(
     setIndex
   );
 
-  redirectLicenseToHomeLogin();
+    /*
+   * 첫 진입: HOME에 이미 로그인한 권한 계정이면
+   * PIN 화면 없이 즉시 원래 SET으로 복귀한다.
+   */
+  redirectLicenseToHomeLogin(false);
 
   return false;
 }
@@ -9472,7 +9480,7 @@ function resumeLicensePendingSetAfterHomeLogin() {
           pending.course
         )
       ) {
-        redirectLicenseToHomeLogin();
+        redirectLicenseToHomeLogin(true);
 
         return;
       }
@@ -9490,7 +9498,7 @@ function resumeLicensePendingSetAfterHomeLogin() {
         error
       );
 
-      redirectLicenseToHomeLogin();
+      redirectLicenseToHomeLogin(true);
     });
 }
 
