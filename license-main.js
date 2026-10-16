@@ -5554,53 +5554,72 @@ function installLicenseHomeButton() {
 
 
 /* ========================================================================
-   BLOCK 21500 START : LOGIN / LOGOUT HEADER BUTTON
+   BLOCK 21500 START : HOME LOGIN / LOGOUT HEADER BUTTON
    ======================================================================== */
 
 function installLicenseAuthButton() {
-  const config = window.LICENSE_CONFIG;
+  const config = window.LICENSE_CONFIG || {};
+
+  const membership =
+    config.membership || {};
 
   const button = document.getElementById(
     'licenseLoginButton'
   );
 
-  if (!config || !button) {
+  if (!button) {
     return;
   }
 
-  let session = null;
+  const memberId = localStorage.getItem(
+    membership.memberStorageKey ||
+      'gongboo-license-member-id'
+  );
 
-  try {
-    session = JSON.parse(
-      localStorage.getItem(config.authStorageKey) || 'null'
-    );
-  } catch (error) {
-    session = null;
-  }
+  const isLoggedIn = Boolean(memberId);
 
-  const isLoggedIn = Boolean(session?.access_token);
+  button.textContent = isLoggedIn
+    ? 'LOGOUT'
+    : 'LOGIN';
 
-  button.textContent = isLoggedIn ? 'LOGOUT' : 'LOGIN';
+  button.href = '#';
 
-  button.href = isLoggedIn ? '#' : 'login.html';
+  button.onclick = function(event) {
+    event.preventDefault();
 
-  button.onclick = event => {
-    if (!isLoggedIn) {
+    if (isLoggedIn) {
+      localStorage.removeItem(
+        membership.memberStorageKey ||
+          'gongboo-license-member-id'
+      );
+
+      window.location.assign(
+        membership.loginUrl ||
+          'https://gongboo-home.pages.dev/login.html'
+      );
+
       return;
     }
 
-    event.preventDefault();
+    const loginUrl = new URL(
+      membership.loginUrl ||
+        'https://gongboo-home.pages.dev/login.html'
+    );
 
-    localStorage.removeItem(config.authStorageKey);
+    loginUrl.searchParams.set(
+      'return_to',
+      window.location.href
+    );
 
-    window.location.href = 'login.html';
+    window.location.assign(
+      loginUrl.toString()
+    );
   };
 }
 
 /* ========================================================================
-   BLOCK 21500 END : LOGIN / LOGOUT HEADER BUTTON
+   BLOCK 21500 END : HOME LOGIN / LOGOUT HEADER BUTTON
    ======================================================================== */
-
 
 
 
@@ -6020,7 +6039,7 @@ async function selectLicenseCourse(course) {
 
 /* ========================================================================
    BLOCK 22200 START : LICENSE QUESTION API
-   로그인 세션 토큰을 포함해 License 문제와 권한을 조회한다.
+   HOME 권한 확인 뒤 License 문제 API를 익명 콘텐츠 요청으로 호출한다.
    ======================================================================== */
 
 async function fetchLicenseQuestions(
@@ -6030,32 +6049,15 @@ async function fetchLicenseQuestions(
 ) {
   const config = window.LICENSE_CONFIG;
 
-  let session = null;
-
-  try {
-    session = JSON.parse(
-      localStorage.getItem(config.authStorageKey) || 'null'
-    );
-  } catch (error) {
-    session = null;
-  }
-
-  const headers = {
-    apikey: config.publishableKey,
-    'Content-Type': 'application/json'
-  };
-
-  if (session?.access_token) {
-    headers.Authorization =
-      'Bearer ' + session.access_token;
-  }
-
   const response = await fetch(
     `${config.url}/functions/v1/${config.functionName}`,
     {
       method: 'POST',
 
-      headers: headers,
+      headers: {
+        apikey: config.publishableKey,
+        'Content-Type': 'application/json'
+      },
 
       body: JSON.stringify({
         action: 'questions',
@@ -6063,24 +6065,24 @@ async function fetchLicenseQuestions(
         product: productCode,
 
         languages: [
-  String(
-    document.getElementById(
-      'primaryLanguageSelect'
-    )?.value || 'EN'
-  ).toLowerCase(),
+          String(
+            document.getElementById(
+              'primaryLanguageSelect'
+            )?.value || 'EN'
+          ).toLowerCase(),
 
-  String(
-    document.getElementById(
-      'secondaryLanguageSelect'
-    )?.value || 'NONE'
-  ).toLowerCase()
-]
-  .filter(function (code, index, codes) {
-    return (
-      ['en', 'ko', 'es'].includes(code) &&
-      codes.indexOf(code) === index
-    );
-  }),
+          String(
+            document.getElementById(
+              'secondaryLanguageSelect'
+            )?.value || 'NONE'
+          ).toLowerCase()
+        ]
+          .filter(function(code, index, codes) {
+            return (
+              ['en', 'ko', 'es'].includes(code) &&
+              codes.indexOf(code) === index
+            );
+          }),
 
         limit: limit,
 
@@ -6103,7 +6105,6 @@ async function fetchLicenseQuestions(
 /* ========================================================================
    BLOCK 22200 END : LICENSE QUESTION API
    ======================================================================== */
-
 
 
 
@@ -9084,6 +9085,285 @@ renderLicenseDirectory = async function () {
 
 
 
+
+
+/* ============================================================================
+   BLOCK 32035 START : HOME MEMBER ACCESS FOR LICENSE SETS
+   SET 1 is free. SET 2+ requires the active HOME product for that course.
+   ========================================================================== */
+
+function getLicenseMembershipConfig() {
+  return (
+    window.LICENSE_CONFIG?.membership || {}
+  );
+}
+
+
+function saveLicenseReturnedMemberId() {
+  const membership =
+    getLicenseMembershipConfig();
+
+  const currentUrl = new URL(
+    window.location.href
+  );
+
+  const memberId = String(
+    currentUrl.searchParams.get('member_id') || ''
+  ).trim();
+
+  if (!memberId) {
+    return;
+  }
+
+  localStorage.setItem(
+    membership.memberStorageKey ||
+      'gongboo-license-member-id',
+    memberId
+  );
+
+  currentUrl.searchParams.delete('member_id');
+
+  window.history.replaceState(
+    {},
+    document.title,
+    currentUrl.toString()
+  );
+}
+
+
+function getLicenseMemberId() {
+  const membership =
+    getLicenseMembershipConfig();
+
+  return String(
+    localStorage.getItem(
+      membership.memberStorageKey ||
+        'gongboo-license-member-id'
+    ) || ''
+  ).trim();
+}
+
+
+function getLicenseCourseProductId(course) {
+  const membership =
+    getLicenseMembershipConfig();
+
+  const productIds =
+    membership.courseProductIds || {};
+
+  const courseKey =
+    getLicenseCourseKey(course);
+
+  const titleKey =
+    getLicenseCourseKey(course?.title);
+
+  return String(
+    productIds[courseKey] ||
+    productIds[titleKey] ||
+    ''
+  ).trim();
+}
+
+
+function setLicenseAccessStatus(message) {
+  const elements = getTemplateElements();
+
+  if (elements.status) {
+    elements.status.textContent = message;
+  }
+}
+
+
+function redirectLicenseToHomeLogin() {
+  const membership =
+    getLicenseMembershipConfig();
+
+  const loginUrl = new URL(
+    membership.loginUrl ||
+      'https://gongboo-home.pages.dev/login.html'
+  );
+
+  loginUrl.searchParams.set(
+    'return_to',
+    window.location.href
+  );
+
+  window.setTimeout(function() {
+    window.location.assign(
+      loginUrl.toString()
+    );
+  }, 700);
+}
+
+
+async function canOpenLicenseSet(
+  course,
+  setIndex
+) {
+  if (Number(setIndex) === 0) {
+    return true;
+  }
+
+  const productId =
+    getLicenseCourseProductId(course);
+
+  if (!productId) {
+    setLicenseAccessStatus(
+      'This course is not connected to a product.'
+    );
+
+    return false;
+  }
+
+  const memberId = getLicenseMemberId();
+
+  if (!memberId) {
+    setLicenseAccessStatus(
+      'Please log in to continue.'
+    );
+
+    redirectLicenseToHomeLogin();
+
+    return false;
+  }
+
+  setLicenseAccessStatus(
+    'Checking your course access...'
+  );
+
+  try {
+    const membership =
+      getLicenseMembershipConfig();
+
+    const response = await fetch(
+      membership.activeProductsUrl ||
+        'https://gongboo-home.pages.dev/api/member',
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+          action: 'active_products',
+          user_id: memberId
+        })
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.ok) {
+      throw new Error(
+        result.error ||
+          'Membership request failed.'
+      );
+    }
+
+    const activeProducts = Array.isArray(
+      result.products
+    )
+      ? result.products
+      : [];
+
+    const hasCourseAccess =
+      result.is_admin === true ||
+      activeProducts.some(function(product) {
+        return String(
+          product.product_id || ''
+        ) === productId;
+      });
+
+    if (hasCourseAccess) {
+      return true;
+    }
+
+    setLicenseAccessStatus(
+      'This course is not active for your account.'
+    );
+
+    return false;
+  } catch (error) {
+    console.error(
+      '[LICENSE] Membership check failed:',
+      error
+    );
+
+    setLicenseAccessStatus(
+      'Course access could not be checked.'
+    );
+
+    return false;
+  }
+}
+
+
+const originalSelectLicenseCourseSet =
+  selectLicenseCourseSet;
+
+selectLicenseCourseSet = async function(
+  course,
+  setIndex
+) {
+  const allowed = await canOpenLicenseSet(
+    course,
+    setIndex
+  );
+
+  if (!allowed) {
+    return;
+  }
+
+  return originalSelectLicenseCourseSet(
+    course,
+    setIndex
+  );
+};
+
+
+const originalResumeStoredLicenseLesson =
+  resumeStoredLicenseLesson;
+
+resumeStoredLicenseLesson = async function() {
+  const lesson = getLicenseResumeSnapshot()?.lesson;
+
+  if (!lesson?.course) {
+    return;
+  }
+
+  const settings = getLicenseCourseSettings(
+    lesson.course
+  );
+
+  const setIndex = Math.max(
+    0,
+    Math.floor(
+      (Number(lesson.windowStart) || 0) /
+        settings.setSize
+    )
+  );
+
+  const allowed = await canOpenLicenseSet(
+    lesson.course,
+    setIndex
+  );
+
+  if (!allowed) {
+    return;
+  }
+
+  return originalResumeStoredLicenseLesson();
+};
+
+
+saveLicenseReturnedMemberId();
+
+/* ============================================================================
+   BLOCK 32035 END : HOME MEMBER ACCESS FOR LICENSE SETS
+   ========================================================================== */
+
+
    
 
 
@@ -9236,6 +9516,45 @@ showLicenseResults = function () {
 /* ============================================================================
    BLOCK 32040 END : ONE SET LOAD AND NEXT SET REQUEST
    ========================================================================== */
+
+
+
+/* ============================================================================
+   BLOCK 32045 START : NEXT SET HOME ACCESS CHECK
+   ========================================================================== */
+
+const originalLoadNextLicenseCourseSet =
+  loadNextLicenseCourseSet;
+
+loadNextLicenseCourseSet = async function(
+  nextSetIndex,
+  button
+) {
+  const allowed = await canOpenLicenseSet(
+    licenseCurrentCourse,
+    nextSetIndex
+  );
+
+  if (!allowed) {
+    if (button) {
+      button.disabled = false;
+
+      button.textContent = 'NEXT SET';
+    }
+
+    return;
+  }
+
+  return originalLoadNextLicenseCourseSet(
+    nextSetIndex,
+    button
+  );
+};
+
+/* ============================================================================
+   BLOCK 32045 END : NEXT SET HOME ACCESS CHECK
+   ========================================================================== */
+
 
 
 

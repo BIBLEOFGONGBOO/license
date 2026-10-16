@@ -4,8 +4,37 @@
 
 window.LICENSE_CONFIG = Object.freeze({
   homeUrl: 'https://gongboo-home.pages.dev/',
-  
-  /* PART 1 : EasyLearning License service */
+
+  membership: Object.freeze({
+    memberStorageKey:
+      'gongboo-license-member-id',
+
+    loginUrl:
+      'https://gongboo-home.pages.dev/login.html',
+
+    activeProductsUrl:
+      'https://gongboo-home.pages.dev/api/member',
+
+    courseProductIds: Object.freeze({
+      CNA: '6001',
+      CALIFORNIACNA: '6001',
+
+      REALESTATE: '6002',
+      CALIFORNIAREALESTATE: '6002',
+
+      INSURANCE: '6003',
+      CALIFORNIAINSURANCE: '6003',
+
+      MORTGAGE: '6004',
+      MORTGAGELENDING: '6004',
+      MORTGAGELENDINGCOMPLIANCE: '6004',
+      MORTGAGELENDINGLAW: '6004',
+
+      NOTARY: '6005'
+    })
+  }),
+
+  /* PART 1 : License content service */
   url: 'https://mlpyhuwrkwdtzpswaqgf.supabase.co',
 
   publishableKey:
@@ -13,12 +42,7 @@ window.LICENSE_CONFIG = Object.freeze({
 
   functionName: 'smooth-worker',
 
-  authStorageKey: 'easylearning_license_auth_v1',
-
   progressPrefix: 'gongboo.license.',
-
-  /* PART 2 : Default course behavior
-     A newly imported course automatically uses these values. */
 
   hiddenCourses: Object.freeze([
     'CALIFORNIAINSURANCE',
@@ -29,9 +53,7 @@ window.LICENSE_CONFIG = Object.freeze({
     'MORTGAGELENDINGLAW'
   ]),
 
-
-
-     courseSettings: Object.freeze({
+  courseSettings: Object.freeze({
     DEFAULT: Object.freeze({
       active: true,
       setSize: 50,
@@ -39,8 +61,6 @@ window.LICENSE_CONFIG = Object.freeze({
       displayOrder: 999
     }),
 
-    /* PART 3 : Optional exceptions only.
-       Delete an entry when the DEFAULT values are sufficient. */
     REALESTATE: Object.freeze({
       title: 'REAL ESTATE',
       displayOrder: 10
@@ -62,26 +82,24 @@ window.LICENSE_CONFIG = Object.freeze({
     })
   }),
 
-  /* PART 4 : AI Tutor */
   tutor: Object.freeze({
     apiUrl:
       'https://sat-bot-07020143.vercel.app/api/chat'
   }),
 
-  /* PART 5 : Dictionary and Azure fallback */
   dictionary: Object.freeze({
-  url: 'https://vejhetvwkjgylglzsxpr.supabase.co',
+    url: 'https://vejhetvwkjgylglzsxpr.supabase.co',
 
-  publishableKey:
-    'sb_publishable_53Lu670zxoCEI90tKbYwsA_EhMYSeCy',
+    publishableKey:
+      'sb_publishable_53Lu670zxoCEI90tKbYwsA_EhMYSeCy',
 
-  table: 'dictionary',
+    table: 'dictionary',
 
-  azureFunctionName: 'hyper-worker',
+    azureFunctionName: 'hyper-worker',
 
-  definitionFunctionName:
-    'dictionary-definition-worker'
-})
+    definitionFunctionName:
+      'dictionary-definition-worker'
+  })
 });
 
 /* ============================================================================
