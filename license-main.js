@@ -8588,6 +8588,35 @@ showLicenseResults = function () {
 
 
 /* ============================================================================
+   BLOCK 32025 START : FIRST LICENSE SET FREE LABEL
+   모든 과목의 SET 1만 FREE로 표시한다.
+   ========================================================================== */
+
+const originalGetLicenseSetLabel =
+  getLicenseSetLabel;
+
+getLicenseSetLabel = function(
+  course,
+  setIndex
+) {
+  const label = originalGetLicenseSetLabel(
+    course,
+    setIndex
+  );
+
+  return Number(setIndex) === 0
+    ? label + ' · FREE'
+    : label;
+};
+
+/* ============================================================================
+   BLOCK 32025 END : FIRST LICENSE SET FREE LABEL
+   ========================================================================== */
+
+
+
+
+/* ============================================================================
    BLOCK 32030 START : LICENSE COURSE FIRST DIRECTORY
    첫 화면은 license_products를 직접 조회한다.
    저장된 목차는 즉시 표시하고, 새 과목 코드가 추가될 때만 갱신한다.
