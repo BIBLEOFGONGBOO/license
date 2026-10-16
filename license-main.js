@@ -6039,7 +6039,7 @@ async function selectLicenseCourse(course) {
 
 /* ========================================================================
    BLOCK 22200 START : LICENSE QUESTION API
-   HOME 권한 확인 뒤 License 문제 API를 익명 콘텐츠 요청으로 호출한다.
+   HOME 회원 ID를 License 문제 서버에 함께 전달한다.
    ======================================================================== */
 
 async function fetchLicenseQuestions(
@@ -6063,6 +6063,8 @@ async function fetchLicenseQuestions(
         action: 'questions',
 
         product: productCode,
+
+        member_id: getLicenseMemberId(),
 
         languages: [
           String(
@@ -6105,7 +6107,6 @@ async function fetchLicenseQuestions(
 /* ========================================================================
    BLOCK 22200 END : LICENSE QUESTION API
    ======================================================================== */
-
 
 
 
