@@ -9118,9 +9118,20 @@ renderLicenseDirectory = async function () {
 
 
 /* ============================================================================
-   BLOCK 32035 START : HOME MEMBER ACCESS FOR LICENSE SETS
-   SET 1 is free. SET 2+ requires the active HOME product for that course.
+   BLOCK 32035 START : LICENSE DIRECT HOME LOGIN ACCESS
+   SET 1은 FREE.
+   SET 2 이상은 HOME 로그인 후 해당 과목 권한이 있어야 연다.
+   중간 안내창·무반응 없이 HOME PIN 로그인으로 즉시 이동한다.
    ========================================================================== */
+
+var licensePageAccess = null;
+
+var licenseMemberReturnReady =
+  Promise.resolve(null);
+
+var LICENSE_PENDING_SET_STORAGE_KEY =
+  'gongboo-license-pending-set-v1';
+
 
 function getLicenseMembershipConfig() {
   return (
@@ -9129,62 +9140,65 @@ function getLicenseMembershipConfig() {
 }
 
 
-function saveLicenseReturnedMemberId() {
-  const membership =
-    getLicenseMembershipConfig();
+function getLicensePendingSet() {
+  try {
+    var raw = sessionStorage.getItem(
+      LICENSE_PENDING_SET_STORAGE_KEY
+    );
 
-  const currentUrl = new URL(
-    window.location.href
-  );
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    sessionStorage.removeItem(
+      LICENSE_PENDING_SET_STORAGE_KEY
+    );
 
-  const memberId = String(
-    currentUrl.searchParams.get('member_id') || ''
-  ).trim();
-
-  if (!memberId) {
-    return;
+    return null;
   }
-
-  localStorage.setItem(
-    membership.memberStorageKey ||
-      'gongboo-license-member-id',
-    memberId
-  );
-
-  currentUrl.searchParams.delete('member_id');
-
-  window.history.replaceState(
-    {},
-    document.title,
-    currentUrl.toString()
-  );
 }
 
 
-function getLicenseMemberId() {
-  const membership =
-    getLicenseMembershipConfig();
+function saveLicensePendingSet(
+  course,
+  setIndex
+) {
+  try {
+    sessionStorage.setItem(
+      LICENSE_PENDING_SET_STORAGE_KEY,
+      JSON.stringify({
+        course: course,
+        setIndex: Math.max(
+          0,
+          Number(setIndex) || 0
+        )
+      })
+    );
+  } catch (error) {
+    console.warn(
+      '[LICENSE] Pending set save failed:',
+      error
+    );
+  }
+}
 
-  return String(
-    localStorage.getItem(
-      membership.memberStorageKey ||
-        'gongboo-license-member-id'
-    ) || ''
-  ).trim();
+
+function clearLicensePendingSet() {
+  sessionStorage.removeItem(
+    LICENSE_PENDING_SET_STORAGE_KEY
+  );
 }
 
 
 function getLicenseCourseProductId(course) {
-  const membership =
+  var membership =
     getLicenseMembershipConfig();
 
-  const productIds =
+  var productIds =
     membership.courseProductIds || {};
 
-  const courseKey =
+  var courseKey =
     getLicenseCourseKey(course);
 
-  const titleKey =
+  var titleKey =
     getLicenseCourseKey(course?.title);
 
   return String(
@@ -9195,34 +9209,141 @@ function getLicenseCourseProductId(course) {
 }
 
 
-function setLicenseAccessStatus(message) {
-  const elements = getTemplateElements();
+async function requestLicenseHomeAccess(memberId) {
+  var membership =
+    getLicenseMembershipConfig();
 
-  if (elements.status) {
-    elements.status.textContent = message;
+  var response = await fetch(
+    membership.activeProductsUrl ||
+      'https://gongboo-home.pages.dev/api/member',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        action: 'active_products',
+        user_id: memberId
+      })
+    }
+  );
+
+  var result = await response.json();
+
+  if (!response.ok || !result.ok) {
+    throw new Error(
+      result.error ||
+        'Membership request failed.'
+    );
   }
+
+  return {
+    user_id: String(result.user_id || '').trim(),
+
+    is_admin: result.is_admin === true,
+
+    product_ids: Array.isArray(result.products)
+      ? result.products.map(function(product) {
+          return String(
+            product.product_id || ''
+          ).trim();
+        })
+      : []
+  };
+}
+
+
+async function saveLicenseReturnedMemberId() {
+  var membership =
+    getLicenseMembershipConfig();
+
+  /*
+   * 예전 LICENSE 전용 ID는 권한 판정에 사용하지 않는다.
+   * HOME가 이번 복귀에서 전달한 member_id만 사용한다.
+   */
+  localStorage.removeItem(
+    membership.memberStorageKey ||
+      'gongboo-license-member-id'
+  );
+
+  var currentUrl = new URL(
+    window.location.href
+  );
+
+  var memberId = String(
+    currentUrl.searchParams.get('member_id') || ''
+  ).trim();
+
+  currentUrl.searchParams.delete('member_id');
+
+  window.history.replaceState(
+    {},
+    document.title,
+    currentUrl.toString()
+  );
+
+  if (!memberId) {
+    return null;
+  }
+
+  licensePageAccess =
+    await requestLicenseHomeAccess(memberId);
+
+  return licensePageAccess;
+}
+
+
+function hasLicenseCourseAccess(course) {
+  var productId =
+    getLicenseCourseProductId(course);
+
+  if (!productId || !licensePageAccess) {
+    return false;
+  }
+
+  return (
+    licensePageAccess.is_admin === true ||
+    licensePageAccess.product_ids.includes(
+      productId
+    )
+  );
 }
 
 
 function redirectLicenseToHomeLogin() {
-  const membership =
+  var membership =
     getLicenseMembershipConfig();
 
-  const loginUrl = new URL(
+  var returnToUrl = new URL(
+    window.location.href
+  );
+
+  returnToUrl.searchParams.delete('member_id');
+
+  var loginUrl = new URL(
     membership.loginUrl ||
       'https://gongboo-home.pages.dev/login.html'
   );
 
+  /*
+   * 현재 HOME에 다른 계정이 로그인되어 있어도
+   * 반드시 PIN 로그인 화면을 표시한다.
+   */
   loginUrl.searchParams.set(
-    'return_to',
-    window.location.href
+    'force_login',
+    '1'
   );
 
-  window.setTimeout(function() {
-    window.location.assign(
-      loginUrl.toString()
-    );
-  }, 700);
+  loginUrl.searchParams.set(
+    'return_to',
+    returnToUrl.toString()
+  );
+
+  window.location.assign(
+    loginUrl.toString()
+  );
 }
 
 
@@ -9230,116 +9351,57 @@ async function canOpenLicenseSet(
   course,
   setIndex
 ) {
+  /*
+   * 모든 과목의 SET 1은 무료.
+   */
   if (Number(setIndex) === 0) {
     return true;
   }
 
-  const productId =
-    getLicenseCourseProductId(course);
-
-  if (!productId) {
-    setLicenseAccessStatus(
-      'This course is not connected to a product.'
+  /*
+   * 해당 과목 PRODUCT_ID 연결 자체가 없으면
+   * 개발 설정 문제이므로 로그인으로 보내지 않는다.
+   */
+  if (!getLicenseCourseProductId(course)) {
+    console.error(
+      '[LICENSE] Product ID is missing:',
+      course
     );
 
     return false;
   }
 
-  const memberId = getLicenseMemberId();
-
-  if (!memberId) {
-    setLicenseAccessStatus(
-      'Please log in to continue.'
-    );
-
-    redirectLicenseToHomeLogin();
-
-    return false;
+  if (hasLicenseCourseAccess(course)) {
+    return true;
   }
 
-  setLicenseAccessStatus(
-    'Checking your course access...'
+  /*
+   * 로그인 안 함 / 다른 계정 / 권한 없음:
+   * 중간 문구 없이 즉시 HOME PIN 로그인으로 이동.
+   */
+  saveLicensePendingSet(
+    course,
+    setIndex
   );
 
-  try {
-    const membership =
-      getLicenseMembershipConfig();
+  redirectLicenseToHomeLogin();
 
-    const response = await fetch(
-      membership.activeProductsUrl ||
-        'https://gongboo-home.pages.dev/api/member',
-      {
-        method: 'POST',
-
-        headers: {
-          'Content-Type': 'application/json'
-        },
-
-        body: JSON.stringify({
-          action: 'active_products',
-          user_id: memberId
-        })
-      }
-    );
-
-    const result = await response.json();
-
-    if (!response.ok || !result.ok) {
-      throw new Error(
-        result.error ||
-          'Membership request failed.'
-      );
-    }
-
-    const activeProducts = Array.isArray(
-      result.products
-    )
-      ? result.products
-      : [];
-
-    const hasCourseAccess =
-      result.is_admin === true ||
-      activeProducts.some(function(product) {
-        return String(
-          product.product_id || ''
-        ) === productId;
-      });
-
-    if (hasCourseAccess) {
-      return true;
-    }
-
-    setLicenseAccessStatus(
-      'This course is not active for your account.'
-    );
-
-    return false;
-  } catch (error) {
-    console.error(
-      '[LICENSE] Membership check failed:',
-      error
-    );
-
-    setLicenseAccessStatus(
-      'Course access could not be checked.'
-    );
-
-    return false;
-  }
+  return false;
 }
 
 
-const originalSelectLicenseCourseSet =
+var originalSelectLicenseCourseSet =
   selectLicenseCourseSet;
 
 selectLicenseCourseSet = async function(
   course,
   setIndex
 ) {
-  const allowed = await canOpenLicenseSet(
-    course,
-    setIndex
-  );
+  var allowed =
+    await canOpenLicenseSet(
+      course,
+      setIndex
+    );
 
   if (!allowed) {
     return;
@@ -9352,21 +9414,22 @@ selectLicenseCourseSet = async function(
 };
 
 
-const originalResumeStoredLicenseLesson =
+var originalResumeStoredLicenseLesson =
   resumeStoredLicenseLesson;
 
 resumeStoredLicenseLesson = async function() {
-  const lesson = getLicenseResumeSnapshot()?.lesson;
+  var lesson =
+    getLicenseResumeSnapshot()?.lesson;
 
   if (!lesson?.course) {
     return;
   }
 
-  const settings = getLicenseCourseSettings(
+  var settings = getLicenseCourseSettings(
     lesson.course
   );
 
-  const setIndex = Math.max(
+  var setIndex = Math.max(
     0,
     Math.floor(
       (Number(lesson.windowStart) || 0) /
@@ -9374,10 +9437,11 @@ resumeStoredLicenseLesson = async function() {
     )
   );
 
-  const allowed = await canOpenLicenseSet(
-    lesson.course,
-    setIndex
-  );
+  var allowed =
+    await canOpenLicenseSet(
+      lesson.course,
+      setIndex
+    );
 
   if (!allowed) {
     return;
@@ -9387,12 +9451,61 @@ resumeStoredLicenseLesson = async function() {
 };
 
 
-saveLicenseReturnedMemberId();
+/*
+ * HOME 로그인에서 돌아온 경우:
+ * 권한 계정이면 원래 누른 SET을 자동으로 연다.
+ * 권한이 없으면 HOME PIN 로그인으로 다시 이동한다.
+ */
+function resumeLicensePendingSetAfterHomeLogin() {
+  licenseMemberReturnReady
+    .then(async function(access) {
+      var pending =
+        getLicensePendingSet();
+
+      if (!pending?.course) {
+        return;
+      }
+
+      if (
+        !access ||
+        !hasLicenseCourseAccess(
+          pending.course
+        )
+      ) {
+        redirectLicenseToHomeLogin();
+
+        return;
+      }
+
+      clearLicensePendingSet();
+
+      return originalSelectLicenseCourseSet(
+        pending.course,
+        pending.setIndex
+      );
+    })
+    .catch(function(error) {
+      console.error(
+        '[LICENSE] Home return failed:',
+        error
+      );
+
+      redirectLicenseToHomeLogin();
+    });
+}
+
+
+licenseMemberReturnReady =
+  saveLicenseReturnedMemberId();
+
+window.setTimeout(
+  resumeLicensePendingSetAfterHomeLogin,
+  0
+);
 
 /* ============================================================================
-   BLOCK 32035 END : HOME MEMBER ACCESS FOR LICENSE SETS
+   BLOCK 32035 END : LICENSE DIRECT HOME LOGIN ACCESS
    ========================================================================== */
-
 
    
 
