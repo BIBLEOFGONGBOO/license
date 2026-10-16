@@ -9139,6 +9139,22 @@ function getLicenseMembershipConfig() {
   );
 }
 
+/* ============================================================================
+   BLOCK 32035A : LICENSE API MEMBER ID COMPATIBILITY
+   기존 questions API가 사용하는 member_id 공급 함수.
+   권한 판정은 licensePageAccess만 사용한다.
+   ========================================================================== */
+
+function getLicenseMemberId() {
+  return String(
+    licensePageAccess?.user_id || ''
+  ).trim();
+}
+
+/* ============================================================================
+   BLOCK 32035A END
+   ========================================================================== */
+
 
 function getLicensePendingSet() {
   try {
