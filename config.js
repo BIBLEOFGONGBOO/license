@@ -5,12 +5,12 @@
 window.LICENSE_CONFIG = Object.freeze({
   homeUrl: 'https://gongboo-home.pages.dev/',
 
-  membership: Object.freeze({
+    membership: Object.freeze({
     memberStorageKey:
-      'gongboo-license-member-id',
+      'gongboo-license-member-session',
 
     loginUrl:
-      'https://gongboo-home.pages.dev/login.html',
+      './login.html',
 
     activeProductsUrl:
       'https://gongboo-home.pages.dev/api/member',
@@ -33,7 +33,6 @@ window.LICENSE_CONFIG = Object.freeze({
       NOTARY: '6005'
     })
   }),
-
   /* PART 1 : License content service */
   url: 'https://mlpyhuwrkwdtzpswaqgf.supabase.co',
 

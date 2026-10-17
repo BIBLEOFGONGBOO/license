@@ -252,361 +252,392 @@
 
 
 
-        <!-- ===============================================================
-             BLOCK 2500 : LOGIN / SIGN UP / PASSWORD TABS
-             =============================================================== -->
+            <!-- ===============================================================
+     BLOCK 2500 : HOME / SIGN UP / PASSWORD TABS
+     =============================================================== -->
 
-        <div class="login-tabs">
+<div class="login-tabs">
+
+    <button
+        class="login-tab-button active"
+        type="button"
+        data-login-tab="loginTab"
+        onclick="
+            sessionStorage.removeItem(
+                'gongboo-license-pending-set-v1'
+            );
+            window.location.assign('./index.html');
+        "
+    >
+        HOME
+    </button>
+
+    <button
+        class="login-tab-button"
+        type="button"
+        data-login-tab="signupTab"
+    >
+        Sign Up
+    </button>
+
+    <button
+        class="login-tab-button"
+        type="button"
+        data-login-tab="changeTab"
+    >
+        Password
+    </button>
+
+</div>
+
+
+
+
+
+ <!-- ===============================================================
+     BLOCK 3000 : LOGIN FORM
+     =============================================================== -->
+
+<form id="loginTab">
+
+    <div class="login-field">
+
+        <label for="loginEmail">
+            E-mail
+        </label>
+
+        <input
+            id="loginEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="example@email.com"
+            required
+        >
+
+    </div>
+
+    <div class="login-field">
+
+        <label for="loginPassword">
+            PIN
+        </label>
+
+        <div class="password-field">
+
+            <input
+                id="loginPassword"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="current-password"
+                placeholder="Enter your PIN"
+                required
+            >
 
             <button
-                class="login-tab-button active"
+                id="toggleLoginPassword"
+                class="password-toggle"
                 type="button"
-                data-login-tab="loginTab"
+                aria-label="Show PIN"
             >
-                Login
-            </button>
-
-            <button
-                class="login-tab-button"
-                type="button"
-                data-login-tab="signupTab"
-            >
-                Sign Up
-            </button>
-
-            <button
-                class="login-tab-button"
-                type="button"
-                data-login-tab="changeTab"
-            >
-                Password
+                👁️
             </button>
 
         </div>
 
+    </div>
+
+    <button
+        id="loginSubmitButton"
+        class="login-submit-button"
+        type="submit"
+    >
+        Login
+    </button>
+
+    <div
+        id="loginResult"
+        class="login-result"
+    ></div>
+
+</form>
 
 
 
 
-        <!-- ===============================================================
-             BLOCK 3000 : LOGIN FORM
-             =============================================================== -->
+<!-- ===============================================================
+     BLOCK 3500 : SIGN UP FORM
+     =============================================================== -->
 
-        <form id="loginTab">
+<section
+    id="signupTab"
+    class="login-form-hidden"
+>
 
-            <div class="login-field">
+    <div class="login-field">
 
-                <label for="loginEmail">
-                    E-mail
-                </label>
+        <label for="signupEmail">
+            E-mail
+        </label>
 
-                <input
-                    id="loginEmail"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="example@email.com"
-                >
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="loginPassword">
-                    Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        id="loginPassword"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Enter your password"
-                    >
-
-                    <button
-                        id="toggleLoginPassword"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button
-                id="loginSubmitButton"
-                class="login-submit-button"
-                type="submit"
-            >
-                Login
-            </button>
-
-            <div
-                id="loginResult"
-                class="login-result"
-            ></div>
-
-        </form>
-
-
-
-
-
-        <!-- ===============================================================
-             BLOCK 3500 : SIGN UP FORM
-             =============================================================== -->
-
-        <section
-            id="signupTab"
-            class="login-form-hidden"
+        <input
+            id="signupEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="example@email.com"
+            required
         >
 
-            <div class="login-field">
+    </div>
 
-                <label for="signupEmail">
-                    E-mail
-                </label>
+    <div class="login-field">
 
-                <input
-                    id="signupEmail"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="example@email.com"
-                >
+        <label for="signupName">
+            Full Name
+        </label>
 
-            </div>
-
-            <div class="login-field">
-
-                <label for="signupName">
-                    Full Name
-                </label>
-
-                <input
-                    id="signupName"
-                    type="text"
-                    autocomplete="name"
-                    placeholder="Your full name"
-                >
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="signupPhone">
-                    Phone Number
-                </label>
-
-                <input
-                    id="signupPhone"
-                    type="tel"
-                    autocomplete="tel"
-                    placeholder="01012345678"
-                >
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="signupPassword">
-                    Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        id="signupPassword"
-                        type="password"
-                        autocomplete="new-password"
-                        placeholder="At least 6 characters"
-                    >
-
-                    <button
-                        id="toggleSignupPassword"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="signupPasswordConfirm">
-                    Confirm Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        id="signupPasswordConfirm"
-                        type="password"
-                        autocomplete="new-password"
-                        placeholder="Confirm password"
-                    >
-
-                    <button
-                        id="toggleSignupPasswordConfirm"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <button
-                id="signupSubmitButton"
-                class="login-submit-button"
-                type="button"
-            >
-                Sign Up
-            </button>
-
-            <div
-                id="signupResult"
-                class="login-result"
-            ></div>
-
-        </section>
-
-
-
-
-
-        <!-- ===============================================================
-             BLOCK 4000 : CHANGE PASSWORD FORM
-             =============================================================== -->
-
-        <section
-            id="changeTab"
-            class="login-form-hidden"
+        <input
+            id="signupName"
+            type="text"
+            autocomplete="name"
+            placeholder="Your full name"
+            required
         >
 
-            <div class="login-field">
+    </div>
 
-                <label for="changeEmail">
-                    E-mail
-                </label>
+    <div class="login-field">
 
-                <input
-                    id="changeEmail"
-                    type="email"
-                    autocomplete="email"
-                    placeholder="example@email.com"
-                >
+        <label for="signupPhone">
+            Phone Number
+        </label>
 
-            </div>
+        <input
+            id="signupPhone"
+            type="tel"
+            autocomplete="tel"
+            placeholder="01012345678"
+        >
 
-            <div class="login-field">
+    </div>
 
-                <label for="changeOldPassword">
-                    Current Password
-                </label>
+    <div class="login-field">
 
-                <div class="password-field">
+        <label for="signupPassword">
+            PIN
+        </label>
 
-                    <input
-                        id="changeOldPassword"
-                        type="password"
-                        autocomplete="current-password"
-                        placeholder="Current password"
-                    >
+        <div class="password-field">
 
-                    <button
-                        id="toggleChangeOldPassword"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="changeNewPassword">
-                    New Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        id="changeNewPassword"
-                        type="password"
-                        autocomplete="new-password"
-                        placeholder="At least 6 characters"
-                    >
-
-                    <button
-                        id="toggleChangeNewPassword"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
-
-            <div class="login-field">
-
-                <label for="changeNewPasswordConfirm">
-                    Confirm New Password
-                </label>
-
-                <div class="password-field">
-
-                    <input
-                        id="changeNewPasswordConfirm"
-                        type="password"
-                        autocomplete="new-password"
-                        placeholder="Confirm new password"
-                    >
-
-                    <button
-                        id="toggleChangeNewPasswordConfirm"
-                        class="password-toggle"
-                        type="button"
-                        aria-label="Show password"
-                    >
-                        👁️
-                    </button>
-
-                </div>
-
-            </div>
+            <input
+                id="signupPassword"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="new-password"
+                placeholder="At least 4 digits"
+                required
+            >
 
             <button
-                id="changePasswordSubmitButton"
-                class="login-submit-button"
+                id="toggleSignupPassword"
+                class="password-toggle"
                 type="button"
+                aria-label="Show PIN"
             >
-                Change Password
+                👁️
             </button>
 
-            <div
-                id="changePasswordResult"
-                class="login-result"
-            ></div>
+        </div>
 
-        </section>
+    </div>
+
+    <div class="login-field">
+
+        <label for="signupPasswordConfirm">
+            Confirm PIN
+        </label>
+
+        <div class="password-field">
+
+            <input
+                id="signupPasswordConfirm"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="new-password"
+                placeholder="Confirm PIN"
+                required
+            >
+
+            <button
+                id="toggleSignupPasswordConfirm"
+                class="password-toggle"
+                type="button"
+                aria-label="Show PIN"
+            >
+                👁️
+            </button>
+
+        </div>
+
+    </div>
+
+    <button
+        id="signupSubmitButton"
+        class="login-submit-button"
+        type="button"
+    >
+        Sign Up
+    </button>
+
+    <div
+        id="signupResult"
+        class="login-result"
+    ></div>
+
+</section>
+
+
+
+ <!-- ===============================================================
+     BLOCK 4000 : CHANGE PIN FORM
+     =============================================================== -->
+
+<section
+    id="changeTab"
+    class="login-form-hidden"
+>
+
+    <div class="login-field">
+
+        <label for="changeEmail">
+            E-mail
+        </label>
+
+        <input
+            id="changeEmail"
+            type="email"
+            autocomplete="email"
+            placeholder="example@email.com"
+            required
+        >
+
+    </div>
+
+    <div class="login-field">
+
+        <label for="changeOldPassword">
+            Current PIN
+        </label>
+
+        <div class="password-field">
+
+            <input
+                id="changeOldPassword"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="current-password"
+                placeholder="Current PIN"
+                required
+            >
+
+            <button
+                id="toggleChangeOldPassword"
+                class="password-toggle"
+                type="button"
+                aria-label="Show current PIN"
+            >
+                👁️
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="login-field">
+
+        <label for="changeNewPassword">
+            New PIN
+        </label>
+
+        <div class="password-field">
+
+            <input
+                id="changeNewPassword"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="new-password"
+                placeholder="At least 4 digits"
+                required
+            >
+
+            <button
+                id="toggleChangeNewPassword"
+                class="password-toggle"
+                type="button"
+                aria-label="Show new PIN"
+            >
+                👁️
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="login-field">
+
+        <label for="changeNewPasswordConfirm">
+            Confirm New PIN
+        </label>
+
+        <div class="password-field">
+
+            <input
+                id="changeNewPasswordConfirm"
+                type="password"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                minlength="4"
+                autocomplete="new-password"
+                placeholder="Confirm new PIN"
+                required
+            >
+
+            <button
+                id="toggleChangeNewPasswordConfirm"
+                class="password-toggle"
+                type="button"
+                aria-label="Show new PIN"
+            >
+                👁️
+            </button>
+
+        </div>
+
+    </div>
+
+    <button
+        id="changePasswordSubmitButton"
+        class="login-submit-button"
+        type="button"
+    >
+        Change PIN
+    </button>
+
+    <div
+        id="changePasswordResult"
+        class="login-result"
+    ></div>
+
+</section>
 
     </main>
 
@@ -614,389 +645,516 @@
 
 
 
-    <!-- ===================================================================
-         BLOCK 9000 : CURRENT LICENSE SUPABASE AUTHENTICATION
-         =================================================================== -->
+ <!-- ===================================================================
+     BLOCK 9000 : LICENSE MEMBER AUTHENTICATION
+     =================================================================== -->
 
-    <script src="config.js"></script>
+<script>
+'use strict';
 
-    <script>
+/* ===============================================================
+   BLOCK 9005 : LICENSE LOCAL LOGIN SESSION
+   =============================================================== */
 
-        'use strict';
+const MEMBER_LOGIN_STORAGE_KEY =
+    'gongboo-license-member-session';
 
-        const LICENSE_AUTH_CONFIG = window.LICENSE_CONFIG;
+const MEMBER_API_URL =
+    'https://gongboo-home.pages.dev/api/member';
 
-        function showResult(elementId, message, isSuccess) {
-            const element = document.getElementById(elementId);
+function finishMemberLogin(member) {
+    const userId = String(
+        member?.user_id || ''
+    ).trim();
 
-            element.textContent = message;
-            element.className =
-                'login-result' + (isSuccess ? ' success' : ' error');
+    if (!userId) {
+        throw new Error(
+            'Login succeeded, but member ID is missing.'
+        );
+    }
+
+    localStorage.setItem(
+        MEMBER_LOGIN_STORAGE_KEY,
+        JSON.stringify({
+            user_id: userId,
+
+            email: String(
+                member?.email || ''
+            ).trim(),
+
+            name: String(
+                member?.name || ''
+            ).trim(),
+
+            logged_in_at: Date.now()
+        })
+    );
+
+    window.location.assign(
+        './index.html'
+    );
+}
+
+/* ===============================================================
+   BLOCK 9005 END : LICENSE LOCAL LOGIN SESSION
+   =============================================================== */
+
+
+/* ===============================================================
+   BLOCK 9015 : LOGIN / SIGN UP / PIN CHANGE EVENTS
+   =============================================================== */
+
+function showResult(
+    elementId,
+    message,
+    isSuccess
+) {
+    const element =
+        document.getElementById(elementId);
+
+    element.textContent = message;
+
+    element.className =
+        'login-result' +
+        (isSuccess ? ' success' : ' error');
+}
+
+async function memberRequest(
+    action,
+    payload
+) {
+    const response = await fetch(
+        MEMBER_API_URL,
+        {
+            method: 'POST',
+
+            headers: {
+                'Content-Type':
+                    'application/json'
+            },
+
+            body: JSON.stringify({
+                action,
+                ...payload
+            })
         }
+    );
 
-        function getAuthErrorMessage(value) {
-            return (
-                value?.message ||
-                value?.msg ||
-                value?.error_description ||
-                value?.error ||
-                'Authentication failed.'
+    const result =
+        await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.ok) {
+        throw new Error(
+            result.error ||
+            'Request failed.'
+        );
+    }
+
+    return result;
+}
+
+function showLoginTab(tabId) {
+    document
+        .querySelectorAll(
+            '.login-tab-button'
+        )
+        .forEach(button => {
+            button.classList.toggle(
+                'active',
+                button.dataset.loginTab === tabId
             );
+        });
+
+    [
+        'loginTab',
+        'signupTab',
+        'changeTab'
+    ].forEach(id => {
+        document
+            .getElementById(id)
+            .classList.toggle(
+                'login-form-hidden',
+                id !== tabId
+            );
+    });
+}
+
+function installPasswordToggle(
+    inputId,
+    buttonId
+) {
+    const input =
+        document.getElementById(inputId);
+
+    const button =
+        document.getElementById(buttonId);
+
+    button.addEventListener(
+        'click',
+        () => {
+            const isHidden =
+                input.type === 'password';
+
+            input.type =
+                isHidden ? 'text' : 'password';
+
+            button.textContent =
+                isHidden ? '🙈' : '👁️';
         }
+    );
+}
 
-        async function licenseAuthRequest(path, options) {
-            const response = await fetch(
-                LICENSE_AUTH_CONFIG.url + path,
-                {
-                    ...options,
-                    headers: {
-                        apikey: LICENSE_AUTH_CONFIG.publishableKey,
-                        'Content-Type': 'application/json',
-                        ...(options?.headers || {})
-                    }
-                }
-            );
+document
+    .querySelectorAll(
+        '.login-tab-button'
+    )
+    .forEach(button => {
+        button.addEventListener(
+            'click',
+            () => {
+                showLoginTab(
+                    button.dataset.loginTab
+                );
+            }
+        );
+    });
 
-            const data = await response.json().catch(() => ({}));
 
-            if (!response.ok) {
-                throw new Error(getAuthErrorMessage(data));
+/* ---------------------------------------------------------------
+   LOGIN
+   --------------------------------------------------------------- */
+
+document
+    .getElementById('loginTab')
+    .addEventListener(
+        'submit',
+        async event => {
+            event.preventDefault();
+
+            const email = document
+                .getElementById('loginEmail')
+                .value
+                .trim();
+
+            const pin = document
+                .getElementById('loginPassword')
+                .value
+                .trim();
+
+            if (
+                !email ||
+                !/^\d{4,}$/.test(pin)
+            ) {
+                showResult(
+                    'loginResult',
+                    'Enter your e-mail and PIN.',
+                    false
+                );
+
+                return;
             }
 
-            return data;
-        }
-
-        function saveLicenseSession(session) {
-            localStorage.setItem(
-                LICENSE_AUTH_CONFIG.authStorageKey,
-                JSON.stringify(session)
+            showResult(
+                'loginResult',
+                'Logging in...',
+                false
             );
-        }
 
-        function showLoginTab(tabId) {
-            document
-                .querySelectorAll('.login-tab-button')
-                .forEach(button => {
-                    button.classList.toggle(
-                        'active',
-                        button.dataset.loginTab === tabId
+            try {
+                const result =
+                    await memberRequest(
+                        'login',
+                        {
+                            email: email,
+                            pin: pin
+                        }
                     );
-                });
 
-            ['loginTab', 'signupTab', 'changeTab'].forEach(id => {
+                finishMemberLogin(
+                    result.member
+                );
+            } catch (error) {
+                showResult(
+                    'loginResult',
+                    error.message ||
+                    'Login failed.',
+                    false
+                );
+            }
+        }
+    );
+
+
+/* ---------------------------------------------------------------
+   SIGN UP
+   --------------------------------------------------------------- */
+
+document
+    .getElementById('signupSubmitButton')
+    .addEventListener(
+        'click',
+        async () => {
+            const email = document
+                .getElementById('signupEmail')
+                .value
+                .trim();
+
+            const name = document
+                .getElementById('signupName')
+                .value
+                .trim();
+
+            const phone = document
+                .getElementById('signupPhone')
+                .value
+                .trim();
+
+            const pin = document
+                .getElementById('signupPassword')
+                .value
+                .trim();
+
+            const confirm = document
+                .getElementById(
+                    'signupPasswordConfirm'
+                )
+                .value
+                .trim();
+
+            if (
+                !email ||
+                !name ||
+                !pin ||
+                !confirm
+            ) {
+                showResult(
+                    'signupResult',
+                    'Please fill in e-mail, name, and PIN.',
+                    false
+                );
+
+                return;
+            }
+
+            if (!/^\d{4,}$/.test(pin)) {
+                showResult(
+                    'signupResult',
+                    'PIN must contain at least 4 digits.',
+                    false
+                );
+
+                return;
+            }
+
+            if (pin !== confirm) {
+                showResult(
+                    'signupResult',
+                    'PINs do not match.',
+                    false
+                );
+
+                return;
+            }
+
+            showResult(
+                'signupResult',
+                'Creating account...',
+                false
+            );
+
+            try {
+                const result =
+                    await memberRequest(
+                        'signup',
+                        {
+                            email: email,
+                            name: name,
+                            phone: phone,
+                            pin: pin
+                        }
+                    );
+
+                finishMemberLogin(
+                    result.member
+                );
+            } catch (error) {
+                showResult(
+                    'signupResult',
+                    error.message ||
+                    'Sign up failed.',
+                    false
+                );
+            }
+        }
+    );
+
+
+/* ---------------------------------------------------------------
+   CHANGE PIN
+   --------------------------------------------------------------- */
+
+document
+    .getElementById(
+        'changePasswordSubmitButton'
+    )
+    .addEventListener(
+        'click',
+        async () => {
+            const email = document
+                .getElementById('changeEmail')
+                .value
+                .trim();
+
+            const oldPin = document
+                .getElementById('changeOldPassword')
+                .value
+                .trim();
+
+            const newPin = document
+                .getElementById('changeNewPassword')
+                .value
+                .trim();
+
+            const confirm = document
+                .getElementById(
+                    'changeNewPasswordConfirm'
+                )
+                .value
+                .trim();
+
+            if (
+                !email ||
+                !oldPin ||
+                !newPin ||
+                !confirm
+            ) {
+                showResult(
+                    'changePasswordResult',
+                    'Please fill in all fields.',
+                    false
+                );
+
+                return;
+            }
+
+            if (!/^\d{4,}$/.test(newPin)) {
+                showResult(
+                    'changePasswordResult',
+                    'New PIN must contain at least 4 digits.',
+                    false
+                );
+
+                return;
+            }
+
+            if (newPin !== confirm) {
+                showResult(
+                    'changePasswordResult',
+                    'New PINs do not match.',
+                    false
+                );
+
+                return;
+            }
+
+            showResult(
+                'changePasswordResult',
+                'Changing PIN...',
+                false
+            );
+
+            try {
+                await memberRequest(
+                    'change_pin',
+                    {
+                        email: email,
+                        old_pin: oldPin,
+                        new_pin: newPin
+                    }
+                );
+
                 document
-                    .getElementById(id)
-                    .classList.toggle(
-                        'login-form-hidden',
-                        id !== tabId
-                    );
-            });
-        }
+                    .getElementById(
+                        'changeOldPassword'
+                    )
+                    .value = '';
 
-        function installPasswordToggle(inputId, buttonId) {
-            const input = document.getElementById(inputId);
-            const button = document.getElementById(buttonId);
+                document
+                    .getElementById(
+                        'changeNewPassword'
+                    )
+                    .value = '';
 
-            button.addEventListener('click', () => {
-                const isHidden = input.type === 'password';
+                document
+                    .getElementById(
+                        'changeNewPasswordConfirm'
+                    )
+                    .value = '';
 
-                input.type = isHidden ? 'text' : 'password';
-                button.textContent = isHidden ? '🙈' : '👁️';
-            });
-        }
-
-        document
-            .querySelectorAll('.login-tab-button')
-            .forEach(button => {
-                button.addEventListener('click', () => {
-                    showLoginTab(button.dataset.loginTab);
-                });
-            });
-
-        document
-            .getElementById('loginTab')
-            .addEventListener('submit', async event => {
-                event.preventDefault();
-
-                const email = document
-                    .getElementById('loginEmail')
-                    .value
-                    .trim();
-
-                const password = document
-                    .getElementById('loginPassword')
-                    .value;
-
-                if (!email || !password) {
-                    showResult(
-                        'loginResult',
-                        'Please enter both e-mail and password.',
-                        false
-                    );
-
-                    return;
-                }
+                document
+                    .getElementById(
+                        'loginEmail'
+                    )
+                    .value = email;
 
                 showResult(
                     'loginResult',
-                    'Logging in...',
-                    false
+                    'PIN changed. Please log in.',
+                    true
                 );
 
-                try {
-                    const session = await licenseAuthRequest(
-                        '/auth/v1/token?grant_type=password',
-                        {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                email,
-                                password
-                            })
-                        }
-                    );
-
-                    saveLicenseSession(session);
-
-                    window.location.href = 'index.html';
-                } catch (error) {
-                    showResult(
-                        'loginResult',
-                        getAuthErrorMessage(error),
-                        false
-                    );
-                }
-            });
-
-        document
-            .getElementById('signupSubmitButton')
-            .addEventListener('click', async () => {
-                const email = document
-                    .getElementById('signupEmail')
-                    .value
-                    .trim();
-
-                const name = document
-                    .getElementById('signupName')
-                    .value
-                    .trim();
-
-                const phone = document
-                    .getElementById('signupPhone')
-                    .value
-                    .trim();
-
-                const password = document
-                    .getElementById('signupPassword')
-                    .value;
-
-                const confirm = document
-                    .getElementById('signupPasswordConfirm')
-                    .value;
-
-                if (!email || !name || !phone || !password || !confirm) {
-                    showResult(
-                        'signupResult',
-                        'Please fill in all fields.',
-                        false
-                    );
-
-                    return;
-                }
-
-                if (password !== confirm) {
-                    showResult(
-                        'signupResult',
-                        'Passwords do not match.',
-                        false
-                    );
-
-                    return;
-                }
-
-                if (password.length < 6) {
-                    showResult(
-                        'signupResult',
-                        'Password must be at least 6 characters.',
-                        false
-                    );
-
-                    return;
-                }
-
-                showResult(
-                    'signupResult',
-                    'Creating account...',
-                    false
-                );
-
-                try {
-                    const result = await licenseAuthRequest(
-                        '/auth/v1/signup',
-                        {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                email,
-                                password,
-                                data: {
-                                    name,
-                                    phone
-                                }
-                            })
-                        }
-                    );
-
-                    if (result.access_token) {
-                        saveLicenseSession(result);
-
-                        window.location.href = 'index.html';
-
-                        return;
-                    }
-
-                    document.getElementById('loginEmail').value = email;
-
-                    showResult(
-                        'loginResult',
-                        'Registration completed. Check your e-mail, then log in.',
-                        true
-                    );
-
-                    showLoginTab('loginTab');
-                } catch (error) {
-                    showResult(
-                        'signupResult',
-                        getAuthErrorMessage(error),
-                        false
-                    );
-                }
-            });
-
-        document
-            .getElementById('changePasswordSubmitButton')
-            .addEventListener('click', async () => {
-                const email = document
-                    .getElementById('changeEmail')
-                    .value
-                    .trim();
-
-                const oldPassword = document
-                    .getElementById('changeOldPassword')
-                    .value;
-
-                const newPassword = document
-                    .getElementById('changeNewPassword')
-                    .value;
-
-                const confirm = document
-                    .getElementById('changeNewPasswordConfirm')
-                    .value;
-
-                if (!email || !oldPassword || !newPassword || !confirm) {
-                    showResult(
-                        'changePasswordResult',
-                        'Please fill in all fields.',
-                        false
-                    );
-
-                    return;
-                }
-
-                if (newPassword !== confirm) {
-                    showResult(
-                        'changePasswordResult',
-                        'New passwords do not match.',
-                        false
-                    );
-
-                    return;
-                }
-
-                if (newPassword.length < 6) {
-                    showResult(
-                        'changePasswordResult',
-                        'Password must be at least 6 characters.',
-                        false
-                    );
-
-                    return;
-                }
-
+                showLoginTab('loginTab');
+            } catch (error) {
                 showResult(
                     'changePasswordResult',
-                    'Changing password...',
+                    error.message ||
+                    'PIN change failed.',
                     false
                 );
+            }
+        }
+    );
 
-                try {
-                    const session = await licenseAuthRequest(
-                        '/auth/v1/token?grant_type=password',
-                        {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                email,
-                                password: oldPassword
-                            })
-                        }
-                    );
 
-                    await licenseAuthRequest('/auth/v1/user', {
-                        method: 'PUT',
-                        headers: {
-                            Authorization:
-                                'Bearer ' + session.access_token
-                        },
-                        body: JSON.stringify({
-                            password: newPassword
-                        })
-                    });
+/* ---------------------------------------------------------------
+   PASSWORD VISIBILITY BUTTONS
+   --------------------------------------------------------------- */
 
-                    saveLicenseSession(session);
+installPasswordToggle(
+    'loginPassword',
+    'toggleLoginPassword'
+);
 
-                    showResult(
-                        'changePasswordResult',
-                        'Password changed.',
-                        true
-                    );
-                } catch (error) {
-                    showResult(
-                        'changePasswordResult',
-                        getAuthErrorMessage(error),
-                        false
-                    );
-                }
-            });
+installPasswordToggle(
+    'signupPassword',
+    'toggleSignupPassword'
+);
 
-        installPasswordToggle(
-            'loginPassword',
-            'toggleLoginPassword'
-        );
+installPasswordToggle(
+    'signupPasswordConfirm',
+    'toggleSignupPasswordConfirm'
+);
 
-        installPasswordToggle(
-            'signupPassword',
-            'toggleSignupPassword'
-        );
+installPasswordToggle(
+    'changeOldPassword',
+    'toggleChangeOldPassword'
+);
 
-        installPasswordToggle(
-            'signupPasswordConfirm',
-            'toggleSignupPasswordConfirm'
-        );
+installPasswordToggle(
+    'changeNewPassword',
+    'toggleChangeNewPassword'
+);
 
-        installPasswordToggle(
-            'changeOldPassword',
-            'toggleChangeOldPassword'
-        );
+installPasswordToggle(
+    'changeNewPasswordConfirm',
+    'toggleChangeNewPasswordConfirm'
+);
 
-        installPasswordToggle(
-            'changeNewPassword',
-            'toggleChangeNewPassword'
-        );
+/* ===============================================================
+   BLOCK 9015 END : LOGIN / SIGN UP / PIN CHANGE EVENTS
+   =============================================================== */
 
-        installPasswordToggle(
-            'changeNewPasswordConfirm',
-            'toggleChangeNewPasswordConfirm'
-        );
-
-    </script>
+</script>
 
 </body>
 
