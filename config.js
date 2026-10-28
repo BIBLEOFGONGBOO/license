@@ -22,8 +22,8 @@ window.LICENSE_CONFIG = Object.freeze({
       REALESTATE: '6002',
       CALIFORNIAREALESTATE: '6002',
 
-      INSURANCE: '6003',
-      CALIFORNIAINSURANCE: '6003',
+      LIFEANDHEALTH: '6003',
+      PROPERTYANDCASUALTY: '6006',
 
       MORTGAGE: '6004',
       MORTGAGELENDING: '6004',
@@ -65,19 +65,24 @@ window.LICENSE_CONFIG = Object.freeze({
       displayOrder: 10
     }),
 
-    INSURANCE: Object.freeze({
-      title: 'INSURANCE',
-      displayOrder: 20
-    }),
+    LIFE_AND_HEALTH: Object.freeze({
+  title: 'INSURANCE · LIFE & HEALTH',
+  displayOrder: 20
+}),
+
+PROPERTY_AND_CASUALTY: Object.freeze({
+  title: 'INSURANCE · PROPERTY & CASUALTY',
+  displayOrder: 30
+}),
 
     MORTGAGE: Object.freeze({
       title: 'MORTGAGE',
-      displayOrder: 30
+      displayOrder: 40
     }),
 
     NOTARY: Object.freeze({
       title: 'NOTARY',
-      displayOrder: 40
+      displayOrder: 50
     })
   }),
 
