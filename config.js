@@ -30,7 +30,9 @@ window.LICENSE_CONFIG = Object.freeze({
       MORTGAGELENDINGCOMPLIANCE: '6004',
       MORTGAGELENDINGLAW: '6004',
 
-      NOTARY: '6005'
+      NOTARY: '6005',
+      PHARMACY: '6007',
+      SERIES6: '6008'
     })
   }),
   /* PART 1 : License content service */
@@ -80,9 +82,19 @@ PROPERTY_AND_CASUALTY: Object.freeze({
       displayOrder: 40
     }),
 
-    NOTARY: Object.freeze({
+        NOTARY: Object.freeze({
       title: 'NOTARY',
       displayOrder: 50
+    }),
+
+    PHARMACY: Object.freeze({
+      title: 'PHARMACY TECHNICIAN',
+      displayOrder: 60
+    }),
+
+    SERIES6: Object.freeze({
+      title: 'SERIES 6 · INVESTMENT COMPANY PRODUCTS',
+      displayOrder: 1000
     })
   }),
 
