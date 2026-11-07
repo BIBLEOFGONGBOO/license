@@ -104,7 +104,7 @@ PROPERTY_AND_CASUALTY: Object.freeze({
 
     SERIES63: Object.freeze({
       title: 'SERIES 63 · UNIFORM SECURITIES AGENT STATE LAW',
-      displayOrder: 1020
+      displayOrder: 1100
     })
   }),
 
