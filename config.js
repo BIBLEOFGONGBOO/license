@@ -92,9 +92,19 @@ PROPERTY_AND_CASUALTY: Object.freeze({
       displayOrder: 60
     }),
 
+    SIE: Object.freeze({
+      title: 'SIE · SECURITIES INDUSTRY ESSENTIALS',
+      displayOrder: 1000
+    }),
+
     SERIES6: Object.freeze({
       title: 'SERIES 6 · INVESTMENT COMPANY PRODUCTS',
-      displayOrder: 1000
+      displayOrder: 1010
+    }),
+
+    SERIES63: Object.freeze({
+      title: 'SERIES 63 · UNIFORM SECURITIES AGENT STATE LAW',
+      displayOrder: 1020
     })
   }),
 
