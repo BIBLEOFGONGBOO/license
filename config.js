@@ -32,7 +32,11 @@ window.LICENSE_CONFIG = Object.freeze({
 
       NOTARY: '6005',
       PHARMACY: '6007',
-      SERIES6: '6008'
+      SERIES6: '6008',
+      SIE: '6009',
+      SERIES63: '6010',
+
+      EA: '6011'
     })
   }),
   /* PART 1 : License content service */
@@ -90,6 +94,11 @@ PROPERTY_AND_CASUALTY: Object.freeze({
     PHARMACY: Object.freeze({
       title: 'PHARMACY TECHNICIAN',
       displayOrder: 60
+    }),
+
+    EA: Object.freeze({
+      title: 'ENROLLED AGENT (EA)',
+      displayOrder: 70
     }),
 
     SIE: Object.freeze({
